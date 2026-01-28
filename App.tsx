@@ -1,116 +1,45 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { LogBox } from 'react-native';
+import AppNavigator from './src/navigation/AppNavigator';
+import { useAppStore } from './src/store';
+import socketService from './src/services/socket';
+import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import "./global.css";
 
 // Notification imports
-import { linking, RootStackParamList, setupNotificationNavigation } from './src/navigation/linking';
-import { setNavigationRef, handleNotificationReceived } from './src/utils/notificationHandlers';
+import { setupNotificationNavigation } from './src/navigation/linking';
+import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import {
   addNotificationReceivedListener,
   getLastNotificationResponse,
   removeNotificationListener,
 } from './src/services/pushNotifications';
-import { NotificationPrompt } from './src/components/mobile/NotificationPrompt';
-import { useNotificationStore } from './src/store/notificationStore';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+// Enable error logging to console (visible in Metro bundler)
+if (__DEV__) {
+  // Log all errors to console
+  const originalError = console.error;
+  console.error = (...args) => {
+    originalError(...args);
+    // Errors will appear in Metro bundler terminal
+  };
 
-// Placeholder screens - replace with your actual screens
-function HomeScreen() {
-  const [showPrompt, setShowPrompt] = useState(false);
-  const { hasPromptedForPermission, unreadCount } = useNotificationStore();
-
-  useEffect(() => {
-    // Show notification prompt on first launch (after a short delay)
-    if (!hasPromptedForPermission) {
-      const timer = setTimeout(() => setShowPrompt(true), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasPromptedForPermission]);
-
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        TeachLink Home
-      </Text>
-      {unreadCount > 0 && (
-        <Text className="text-indigo-600 mb-4">
-          You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}
-        </Text>
-      )}
-      <TouchableOpacity
-        onPress={() => setShowPrompt(true)}
-        className="bg-indigo-600 px-6 py-3 rounded-xl"
-      >
-        <Text className="text-white font-semibold">Test Notification Prompt</Text>
-      </TouchableOpacity>
-
-      <NotificationPrompt
-        visible={showPrompt}
-        onClose={() => setShowPrompt(false)}
-        onPermissionGranted={() => console.log('Permission granted!')}
-        onPermissionDenied={() => console.log('Permission denied')}
-      />
-    </View>
-  );
-}
-
-function CourseDetailScreen({ route }: { route: { params: { courseId: string } } }) {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-xl text-gray-900 dark:text-white">
-        Course: {route.params.courseId}
-      </Text>
-    </View>
-  );
-}
-
-function ChatScreen({ route }: { route: { params: { conversationId: string } } }) {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-xl text-gray-900 dark:text-white">
-        Chat: {route.params.conversationId}
-      </Text>
-    </View>
-  );
-}
-
-function LearningScreen() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-xl text-gray-900 dark:text-white">Learning Dashboard</Text>
-    </View>
-  );
-}
-
-function AchievementDetailScreen({ route }: { route: { params: { achievementId: string } } }) {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-xl text-gray-900 dark:text-white">
-        Achievement: {route.params.achievementId}
-      </Text>
-    </View>
-  );
-}
-
-function CommunityPostScreen({ route }: { route: { params: { postId: string } } }) {
-  return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-xl text-gray-900 dark:text-white">
-        Post: {route.params.postId}
-      </Text>
-    </View>
-  );
+  // Show warnings in console but don't break the app
+  LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);
 }
 
 export default function App() {
-  const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
+  const theme = useAppStore((state) => state.theme);
 
   useEffect(() => {
+    // Connect to socket when app starts
+    socketService.connect();
+
     // Set up notification navigation handler
-    const cleanup = setupNotificationNavigation();
+    const notificationCleanup = setupNotificationNavigation();
 
     // Listen for notifications received while app is foregrounded
     const subscription = addNotificationReceivedListener(handleNotificationReceived);
@@ -122,62 +51,18 @@ export default function App() {
       }
     });
 
+    // Cleanup on unmount
     return () => {
-      cleanup();
+      socketService.disconnect();
+      notificationCleanup();
       removeNotificationListener(subscription);
     };
   }, []);
 
   return (
-    <>
-      <StatusBar style="auto" />
-      <NavigationContainer
-        ref={navigationRef}
-        linking={linking}
-        onReady={() => {
-          // Set navigation ref for notification handlers
-          if (navigationRef.current) {
-            setNavigationRef({
-              navigate: (screen, params) => {
-                navigationRef.current?.navigate(screen as keyof RootStackParamList, params as any);
-              },
-              isReady: () => navigationRef.current?.isReady() ?? false,
-            });
-          }
-        }}
-      >
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{
-            headerStyle: { backgroundColor: '#4F46E5' },
-            headerTintColor: '#fff',
-            headerTitleStyle: { fontWeight: 'bold' },
-          }}
-        >
-          <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'TeachLink' }} />
-          <Stack.Screen
-            name="CourseDetail"
-            component={CourseDetailScreen}
-            options={{ title: 'Course' }}
-          />
-          <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
-          <Stack.Screen
-            name="Learning"
-            component={LearningScreen}
-            options={{ title: 'Learning' }}
-          />
-          <Stack.Screen
-            name="AchievementDetail"
-            component={AchievementDetailScreen}
-            options={{ title: 'Achievement' }}
-          />
-          <Stack.Screen
-            name="CommunityPost"
-            component={CommunityPostScreen}
-            options={{ title: 'Post' }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </>
+    <ErrorBoundary>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <AppNavigator />
+    </ErrorBoundary>
   );
 }
