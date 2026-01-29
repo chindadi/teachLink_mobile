@@ -31,17 +31,30 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
 
 app-example
 
 # generated native folders
 /ios
 /android
-.env
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
 
 # Documentation files (except README.md)
 *.md

@@ -1,11 +1,6 @@
-# Welcome to your Expo app 👋
-
-<<<<<<< HEAD
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-=======
-
 # Teachme Mobile
->>>>>>> upstream/main
+
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
 
@@ -42,18 +37,15 @@ npm install
 npx expo start
 ```
 
-🔥 Features
+Features
 - **Cross-platform (iOS & Android)**
 - **Share and browse knowledge content**
 - **Live chat and push notifications**
 - **Earn from your contributions**
 - **Dark/light mode**
 
-📁 Folder Structure
+Folder Structure
 ```bash
-css
-Copy
-Edit
 src/
 ├── screens/
 ├── components/

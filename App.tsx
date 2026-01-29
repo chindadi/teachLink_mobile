@@ -7,6 +7,15 @@ import socketService from './src/services/socket';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import "./global.css";
 
+// Notification imports
+import { setupNotificationNavigation } from './src/navigation/linking';
+import { handleNotificationReceived } from './src/utils/notificationHandlers';
+import {
+  addNotificationReceivedListener,
+  getLastNotificationResponse,
+  removeNotificationListener,
+} from './src/services/pushNotifications';
+
 // Enable error logging to console (visible in Metro bundler)
 if (__DEV__) {
   // Log all errors to console
@@ -29,9 +38,24 @@ export default function App() {
     // Connect to socket when app starts
     socketService.connect();
 
+    // Set up notification navigation handler
+    const notificationCleanup = setupNotificationNavigation();
+
+    // Listen for notifications received while app is foregrounded
+    const subscription = addNotificationReceivedListener(handleNotificationReceived);
+
+    // Check if app was launched from a notification
+    getLastNotificationResponse().then((response) => {
+      if (response) {
+        console.log('App launched from notification:', response);
+      }
+    });
+
     // Cleanup on unmount
     return () => {
       socketService.disconnect();
+      notificationCleanup();
+      removeNotificationListener(subscription);
     };
   }, []);
 

@@ -23,3 +23,5 @@ export const useAppStore = create<AppState>((set) => ({
   setTheme: (theme) => set({ theme }),
   logout: () => set({ user: null, isAuthenticated: false }),
 }));
+
+export * from './notificationStore';
