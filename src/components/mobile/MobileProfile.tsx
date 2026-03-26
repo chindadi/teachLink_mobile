@@ -347,6 +347,9 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
               style={styles.avatarContainer}
               onPress={() => setIsCameraVisible(true)}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Change avatar"
+              accessibilityHint="Opens the camera to take a new profile picture"
             >
               {profile.avatar ? (
                 <Image
@@ -372,6 +375,8 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={handleStartEdit}
+                accessibilityRole="button"
+                accessibilityLabel="Edit Profile"
               >
                 <Edit3 size={15} color="#19c3e6" />
                 <Text style={styles.editButtonText}>Edit Profile</Text>
@@ -503,6 +508,9 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
               key={tab.key}
               style={styles.tabItem}
               onPress={() => setActiveTab(tab.key)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === tab.key }}
+              accessibilityLabel={`${tab.label} tab`}
             >
               <Text
                 style={[
