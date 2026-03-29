@@ -4,11 +4,14 @@ import { SwipeableNavigation } from '../src/components/mobile/SwipeableNavigatio
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import "../global.css"; // NativeWind CSS
+import { AnalyticsProvider } from '../src/components/mobile/AnalyticsProvider';
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SwipeableNavigation />
-    </GestureHandlerRootView>
+    <AnalyticsProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SwipeableNavigation />
+      </GestureHandlerRootView>
+    </AnalyticsProvider>
   );
 }
