@@ -19,14 +19,25 @@ export const MobileHeader = ({ title, showBack = false, rightAction }: MobileHea
         <View
             className="bg-white border-b border-gray-200 flex-row items-center justify-between px-4 pb-3"
             style={{ paddingTop: top }}
+            accessibilityRole="header"
         >
             <View className="flex-row items-center gap-3">
                 {showBack ? (
-                    <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
+                    <TouchableOpacity 
+                        onPress={() => navigation.goBack()} 
+                        className="p-2"
+                        accessibilityRole="button"
+                        accessibilityLabel="Go back"
+                    >
                         <ArrowLeft color="#1F2937" size={24} />
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity onPress={() => navigation.openDrawer()} className="p-2">
+                    <TouchableOpacity 
+                        onPress={() => navigation.openDrawer()} 
+                        className="p-2"
+                        accessibilityRole="button"
+                        accessibilityLabel="Open navigation drawer"
+                    >
                         <Menu color="#1F2937" size={24} />
                     </TouchableOpacity>
                 )}
@@ -35,7 +46,11 @@ export const MobileHeader = ({ title, showBack = false, rightAction }: MobileHea
 
             <View className="flex-row items-center">
                 {rightAction || (
-                    <TouchableOpacity className="p-2">
+                    <TouchableOpacity 
+                        className="p-2"
+                        accessibilityRole="button"
+                        accessibilityLabel="View notifications"
+                    >
                         <Bell color="#4B5563" size={20} />
                     </TouchableOpacity>
                 )}

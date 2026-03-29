@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Award, Lock, X } from 'lucide-react-native';
+import { combineAriaLabels, getAccessibilityProps, announceToScreenReader } from '../../utils/accessibility';
+import { AccessibleButton } from './AccessibleButton';
 
 type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
@@ -54,17 +56,32 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
   const unlockedCount = achievements.filter((a) => !a.isLocked).length;
   const totalCount = achievements.length;
 
+  const handleSelectBadge = useCallback((achievement: Achievement) => {
+    setSelectedBadge(achievement);
+    announceToScreenReader(`Opening details for ${achievement.name} badge.`);
+  }, []);
+
   const renderBadge = (achievement: Achievement) => {
     const rarity = achievement.rarity ?? 'common';
     const gradColors = RARITY_COLORS[rarity];
     const isLocked = achievement.isLocked;
 
+    const badgeLabel = combineAriaLabels(
+      `${achievement.name} badge`,
+      RARITY_LABELS[rarity],
+      isLocked ? 'Locked' : `Unlocked on ${achievement.unlockedAt ?? 'unknown date'}`,
+      achievement.progress && !achievement.unlockedAt 
+        ? `Progress: ${achievement.progress.current} of ${achievement.progress.total}`
+        : null
+    );
+
     return (
       <TouchableOpacity
         key={achievement.id}
-        onPress={() => setSelectedBadge(achievement)}
+        onPress={() => handleSelectBadge(achievement)}
         style={styles.badgeWrapper}
         activeOpacity={0.8}
+        {...getAccessibilityProps(badgeLabel, 'button', 'Double tap to view badge details')}
       >
         <View style={[styles.badgeOuter, isLocked && styles.badgeOuterLocked]}>
           {isLocked ? (
@@ -80,9 +97,14 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                 <Image
                   source={{ uri: achievement.iconUrl }}
                   style={styles.badgeImage}
+                  accessibilityRole="image"
+                  accessibilityLabel={`${achievement.name} icon`}
                 />
               ) : (
-                <Text style={styles.badgeEmoji}>
+                <Text 
+                  style={styles.badgeEmoji}
+                  importantForAccessibility="no-hide-descendants"
+                >
                   {achievement.emoji ?? '🏆'}
                 </Text>
               )}
@@ -107,12 +129,22 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
             },
           ]}
           numberOfLines={2}
+          importantForAccessibility="no-hide-descendants"
         >
           {achievement.name}
         </Text>
 
         {achievement.progress && !achievement.unlockedAt && (
-          <View style={styles.progressBar}>
+          <View 
+            style={styles.progressBar}
+            accessibilityRole="progressbar"
+            accessibilityValue={{
+              min: 0,
+              max: achievement.progress.total,
+              now: achievement.progress.current,
+            }}
+            accessibilityLabel={`${achievement.name} progress bar`}
+          >
             <View
               style={[
                 styles.progressFill,
@@ -135,7 +167,10 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0f172a' : '#fff' }]}>
       {/* Section header */}
-      <View style={styles.sectionHeader}>
+      <View 
+        style={styles.sectionHeader}
+        accessibilityRole="header"
+      >
         <View style={styles.headerLeft}>
           <Award size={20} color="#19c3e6" />
           <Text
@@ -147,7 +182,10 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
             Achievements
           </Text>
         </View>
-        <View style={styles.countBadge}>
+        <View 
+          style={styles.countBadge}
+          accessibilityLabel={`${unlockedCount} out of ${totalCount} achievements unlocked`}
+        >
           <Text style={styles.countText}>
             {unlockedCount}/{totalCount}
           </Text>
@@ -159,11 +197,15 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          accessibilityLabel="Horizontal achievements list"
         >
           {achievements.map(renderBadge)}
         </ScrollView>
       ) : (
-        <View style={styles.emptyState}>
+        <View 
+          style={styles.emptyState}
+          {...getAccessibilityProps('No achievements earned yet. Complete courses to earn badges.', 'none')}
+        >
           <Award size={40} color="#e2e8f0" />
           <Text
             style={[
@@ -177,26 +219,38 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
       )}
 
       {/* Badge detail modal */}
-      <Modal visible={!!selectedBadge} transparent animationType="fade">
+      <Modal 
+        visible={!!selectedBadge} 
+        transparent 
+        animationType="fade"
+        onRequestClose={() => setSelectedBadge(null)}
+        accessibilityLabel="Achievement details"
+      >
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setSelectedBadge(null)}
+          accessibilityLabel="Close modal"
+          accessibilityRole="button"
         >
           <View
             style={[
               styles.modalCard,
               { backgroundColor: isDark ? '#1e293b' : '#fff' },
             ]}
+            onStartShouldSetResponder={() => true}
+            onTouchEnd={(e: any) => e.stopPropagation()}
           >
-            <TouchableOpacity
-              style={styles.modalClose}
+            <AccessibleButton
+              label="Close details"
               onPress={() => setSelectedBadge(null)}
+              containerStyle={styles.modalClose}
+              activeOpacity={0.6}
             >
               <X size={18} color="#64748b" />
-            </TouchableOpacity>
+            </AccessibleButton>
 
             {selectedBadge && (() => {
-              const rarity = selectedBadge.rarity ?? 'common';
+              const rarity: BadgeRarity = selectedBadge.rarity ?? 'common';
               const gradColors = RARITY_COLORS[rarity];
               return (
                 <>
@@ -207,6 +261,7 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                           styles.modalBadgeInner,
                           styles.lockedInner,
                         ]}
+                        accessibilityLabel="Locked badge"
                       >
                         <Lock size={32} color="#94a3b8" />
                       </View>
@@ -214,8 +269,12 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                       <LinearGradient
                         colors={gradColors}
                         style={styles.modalBadgeInner}
+                        accessibilityLabel="Unlocked badge icon"
                       >
-                        <Text style={styles.modalEmoji}>
+                        <Text 
+                          style={styles.modalEmoji}
+                          importantForAccessibility="no-hide-descendants"
+                        >
                           {selectedBadge.emoji ?? '🏆'}
                         </Text>
                       </LinearGradient>
@@ -231,7 +290,10 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                     {selectedBadge.name}
                   </Text>
 
-                  <View style={styles.rarityTag}>
+                  <View 
+                    style={styles.rarityTag}
+                    accessibilityLabel={`Rarity: ${RARITY_LABELS[rarity]}`}
+                  >
                     <Text
                       style={[
                         styles.rarityText,
@@ -259,6 +321,7 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                         styles.unlockedDate,
                         { color: isDark ? '#475569' : '#94a3b8' },
                       ]}
+                      accessibilityLabel={`Unlocked on ${selectedBadge.unlockedAt}`}
                     >
                       Unlocked {selectedBadge.unlockedAt}
                     </Text>
@@ -275,7 +338,15 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = ({
                         Progress: {selectedBadge.progress.current}/
                         {selectedBadge.progress.total}
                       </Text>
-                      <View style={styles.modalProgressBar}>
+                      <View 
+                        style={styles.modalProgressBar}
+                        accessibilityRole="progressbar"
+                        accessibilityValue={{
+                          min: 0,
+                          max: selectedBadge.progress.total,
+                          now: selectedBadge.progress.current,
+                        }}
+                      >
                         <View
                           style={[
                             styles.modalProgressFill,
@@ -341,6 +412,7 @@ const styles = StyleSheet.create({
   badgeWrapper: {
     alignItems: 'center',
     width: 72,
+    minHeight: 44,
   },
   badgeOuter: {
     position: 'relative',

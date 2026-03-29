@@ -28,6 +28,9 @@ export default function HomeScreen({ navigation }: Props) {
                         course: sampleCourse,
                     })
                 }
+                accessibilityRole="button"
+                accessibilityLabel="Start Learning"
+                accessibilityHint="Opens the course viewer with a sample lesson"
             >
                 <View style={styles.buttonContent}>
                     <Text style={styles.buttonIcon}>📚</Text>
@@ -42,6 +45,9 @@ export default function HomeScreen({ navigation }: Props) {
             <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={() => navigation.navigate('Search')}
+                accessibilityRole="button"
+                accessibilityLabel="Search courses"
+                accessibilityHint="Navigates to the search screen"
             >
                 <View style={styles.secondaryButtonContent}>
                     <Text style={styles.secondaryIcon}>🔍</Text>
@@ -59,6 +65,9 @@ export default function HomeScreen({ navigation }: Props) {
                 <TouchableOpacity
                     style={styles.secondaryButton}
                     onPress={() => navigation.navigate('Profile', { userId: '123' })}
+                    accessibilityRole="button"
+                    accessibilityLabel="My Profile"
+                    accessibilityHint="View your learning progress and achievements"
                 >
                     <View style={styles.secondaryButtonContent}>
                         <Text style={styles.secondaryIcon}>👤</Text>
@@ -74,6 +83,9 @@ export default function HomeScreen({ navigation }: Props) {
                 <TouchableOpacity
                     style={styles.secondaryButton}
                     onPress={() => navigation.navigate('Settings')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Settings"
+                    accessibilityHint="Customize your app experience"
                 >
                     <View style={styles.secondaryButtonContent}>
                         <Text style={styles.secondaryIcon}>⚙️</Text>
