@@ -7,7 +7,7 @@ import {
   getRefreshToken,
   saveTokens,
 } from "../secureStorage";
-import requestQueue from "./requestQueue";
+import { requestQueue } from "./requestQueue";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -93,6 +93,8 @@ apiClient.interceptors.response.use(
       }
       return Promise.reject(error);
     }
+
+    const status = error.response?.status;
 
     // ─── 401: Token refresh flow ───────────────────────────────────────────
 
