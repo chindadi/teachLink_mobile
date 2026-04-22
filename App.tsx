@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { LogBox } from 'react-native';
 import "./global.css";
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
-import AppNavigator from './src/navigation/AppNavigator';
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 
@@ -67,7 +66,6 @@ export default function App() {
   return (
     <ErrorBoundary>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <AppNavigator />
     </ErrorBoundary>
   );
 }
