@@ -1,20 +1,21 @@
-import React, { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { LogBox } from 'react-native';
-import AppNavigator from './src/navigation/AppNavigator';
-import { useAppStore } from './src/store';
-import socketService from './src/services/socket';
-import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect } from "react";
+import { LogBox } from "react-native";
 import "./global.css";
+import { ErrorBoundary } from "./src/components/common/ErrorBoundary";
+import AppNavigator from "./src/navigation/AppNavigator";
+import socketService from "./src/services/socket";
+import { useAppStore } from "./src/store";
 
 // Notification imports
-import { setupNotificationNavigation } from './src/navigation/linking';
-import { handleNotificationReceived } from './src/utils/notificationHandlers';
+import { AuthProvider } from "./src/hooks";
+import { setupNotificationNavigation } from "./src/navigation/linking";
 import {
   addNotificationReceivedListener,
   getLastNotificationResponse,
   removeNotificationListener,
-} from './src/services/pushNotifications';
+} from "./src/services/pushNotifications";
+import { handleNotificationReceived } from "./src/utils/notificationHandlers";
 
 // Enable error logging to console (visible in Metro bundler)
 if (__DEV__) {
@@ -27,7 +28,7 @@ if (__DEV__) {
 
   // Show warnings in console but don't break the app
   LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state',
+    "Non-serializable values were found in the navigation state",
   ]);
 }
 
@@ -42,12 +43,14 @@ export default function App() {
     const notificationCleanup = setupNotificationNavigation();
 
     // Listen for notifications received while app is foregrounded
-    const subscription = addNotificationReceivedListener(handleNotificationReceived);
+    const subscription = addNotificationReceivedListener(
+      handleNotificationReceived,
+    );
 
     // Check if app was launched from a notification
     getLastNotificationResponse().then((response) => {
       if (response) {
-        console.log('App launched from notification:', response);
+        console.log("App launched from notification:", response);
       }
     });
 
@@ -61,8 +64,10 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <AppNavigator />
+      <AuthProvider>
+        <StatusBar style={theme === "dark" ? "light" : "dark"} />
+        <AppNavigator />
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
