@@ -11,6 +11,8 @@ export interface User {
 interface AppState {
   user: User | null;
   isAuthenticated: boolean;
+  isAuthLoading: boolean;
+  authError: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   sessionExpiresAt: number | null;
@@ -18,12 +20,16 @@ interface AppState {
   setUser: (user: User | null) => void;
   setTheme: (theme: "light" | "dark") => void;
   setTokens: (accessToken: string, refreshToken: string, expiresAt: number) => void;
+  setAuthLoading: (loading: boolean) => void;
+  setAuthError: (error: string | null) => void;
   logout: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
   user: null,
   isAuthenticated: false,
+  isAuthLoading: false,
+  authError: null,
   accessToken: null,
   refreshToken: null,
   sessionExpiresAt: null,
@@ -32,10 +38,14 @@ export const useAppStore = create<AppState>((set) => ({
   setTheme: (theme) => set({ theme }),
   setTokens: (accessToken, refreshToken, sessionExpiresAt) =>
     set({ accessToken, refreshToken, sessionExpiresAt }),
+  setAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
+  setAuthError: (authError) => set({ authError }),
   logout: () =>
     set({
       user: null,
       isAuthenticated: false,
+      isAuthLoading: false,
+      authError: null,
       accessToken: null,
       refreshToken: null,
       sessionExpiresAt: null,
