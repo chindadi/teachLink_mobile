@@ -7,9 +7,10 @@ import AppNavigator from './src/navigation/AppNavigator';
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 import logger from './src/utils/logger';
-
 // Notification imports
 import { setupNotificationNavigation } from './src/navigation/linking';
+import apiClient from './src/services/api/axios.config';
+import requestQueue from './src/services/api/requestQueue';
 import {
     addNotificationReceivedListener,
     getLastNotificationResponse,
@@ -32,6 +33,9 @@ export default function App() {
   useEffect(() => {
     // Connect to socket when app starts
     socketService.connect();
+
+    // Start request queue monitoring
+    requestQueue.startMonitoring(apiClient);
 
     // Set up notification navigation handler
     const notificationCleanup = setupNotificationNavigation();
