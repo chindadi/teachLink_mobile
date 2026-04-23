@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { MobileSearch } from '../components/mobile/MobileSearch';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { MobileHeader } from '../components/mobile/MobileHeader';
+import { MobileSearch } from '../components/mobile/MobileSearch';
 import { SearchResultItem } from '../components/mobile/SearchResultCard';
 import { sampleCourse } from '../data/sampleCourse';
+import { RootStackParamList } from '../navigation/types';
 import { useAppStore } from '../store';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Search'>;

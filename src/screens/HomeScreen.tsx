@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { sampleCourse } from '../data/sampleCourse';
+import { RootStackParamList } from '../navigation/types';
 import { useAppStore } from '../store';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
