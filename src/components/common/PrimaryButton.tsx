@@ -20,6 +20,8 @@ interface PrimaryButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   icon?: React.ReactNode;
+  accessibilityHint?: string;
+  accessibilityLabel?: string;
 }
 
 export default function PrimaryButton({
@@ -32,8 +34,11 @@ export default function PrimaryButton({
   style,
   textStyle,
   icon,
+  accessibilityHint,
+  accessibilityLabel,
 }: PrimaryButtonProps) {
   const isDisabled = loading || disabled;
+  const buttonLabel = accessibilityLabel ?? title;
 
   const sizeConfig = {
     small: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, fontSize: 14 },
@@ -50,6 +55,10 @@ export default function PrimaryButton({
         disabled={isDisabled}
         activeOpacity={0.8}
         style={[{ opacity: isDisabled ? 0.6 : 1 }, style]}
+        accessibilityRole="button"
+        accessibilityLabel={buttonLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
       >
         <LinearGradient
           colors={['#20afe7', '#2c8aec', '#586ce9']}
@@ -92,6 +101,10 @@ export default function PrimaryButton({
         onPress={onPress}
         disabled={isDisabled}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={buttonLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
         style={[
           styles.button,
           {
@@ -130,6 +143,10 @@ export default function PrimaryButton({
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={buttonLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
       style={[
         styles.button,
         {
