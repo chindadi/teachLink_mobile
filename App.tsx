@@ -1,12 +1,16 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { LogBox } from "react-native";
-import "..//assets/global.css";
-import { ErrorBoundary } from "./src/components/common/ErrorBoundary";
-import crashReportingService from "./src/services/crashReporting";
-import socketService from "./src/services/socket";
-import { useAppStore } from "./src/store";
-import logger from "./src/utils/logger";
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
+import { LogBox } from 'react-native';
+import '../assets/global.css';
+import { requireEnvVariables } from './src/config/env';
+import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import crashReportingService from './src/services/crashReporting';
+import socketService from './src/services/socket';
+import { useAppStore } from './src/store';
+import logger from './src/utils/logger';
+import AppNavigator from './src/navigation/AppNavigator';
+
+requireEnvVariables();
 // Notification imports
 import { setupNotificationNavigation } from "./src/navigation/linking";
 import apiClient from "./src/services/api/axios.config";
@@ -80,9 +84,10 @@ export default function App() {
     };
   }, []);
 
-  return (
+return (
     <ErrorBoundary>
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <AppNavigator />
     </ErrorBoundary>
   );
 }
