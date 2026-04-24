@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { crashReportingService } from '../../services/crashReporting';
+import logger from '../../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -50,13 +51,13 @@ export class ErrorBoundary extends Component<Props, State> {
         componentStack: errorInfo.componentStack,
       });
     } catch (reportingError) {
-      console.error('Error reporting failed:', reportingError);
+      logger.error('Error reporting failed:', reportingError);
     }
 
     // Always log locally as a fallback for development and non-configured monitoring.
-    console.error(`[${boundaryName}] Caught runtime error:`, error.message);
-    console.error(error);
-    console.error(`[${boundaryName}] Component stack:\n${errorInfo.componentStack}`);
+    logger.error(`[${boundaryName}] Caught runtime error:`, error.message);
+    logger.error(error);
+    logger.error(`[${boundaryName}] Component stack:\n${errorInfo.componentStack}`);
 
     this.props.onError?.(error, errorInfo);
     
