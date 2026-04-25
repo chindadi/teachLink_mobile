@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -9,6 +8,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
+import { AppText as Text } from '../common/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton } from '../ui/Skeleton';
 import {
@@ -201,12 +201,15 @@ interface MobileProfileProps {
   isLoading?: boolean;
 }
 
+import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
+
 export const MobileProfile: React.FC<MobileProfileProps> = ({
   userId: _userId,
   isDark = false,
   isLoading = false,
 }) => {
   const [profile, setProfile] = useState<ProfileData>(MOCK_PROFILE);
+  const { scale } = useDynamicFontSize();
 
   if (isLoading) {
     const bg = isDark ? '#0f172a' : '#f8fafc';
