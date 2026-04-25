@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { NotificationData, NotificationType } from '../types/notifications';
+import logger from '../utils/logger';
 
 // Configure how notifications are handled when app is in foreground
 Notifications.setNotificationHandler({
@@ -20,7 +21,7 @@ Notifications.setNotificationHandler({
  */
 export async function registerForPushNotifications(): Promise<string | null> {
   if (!Device.isDevice) {
-    console.warn('Push notifications require a physical device');
+    logger.warn('Push notifications require a physical device');
     return null;
   }
 
@@ -36,7 +37,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
     }
 
     if (finalStatus !== 'granted') {
-      console.warn('Push notification permission not granted');
+      logger.warn('Push notification permission not granted');
       return null;
     }
 
@@ -53,7 +54,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
 
     return token.data;
   } catch (error) {
-    console.error('Error registering for push notifications:', error);
+    logger.error('Error registering for push notifications:', error);
     return null;
   }
 }
@@ -150,10 +151,10 @@ export async function registerTokenWithBackend(token: string): Promise<boolean> 
     // });
     // return response.data.success;
 
-    console.log('Push token registered:', token);
+    logger.info('Push token registered:', token);
     return true;
   } catch (error) {
-    console.error('Error registering token with backend:', error);
+    logger.error('Error registering token with backend:', error);
     return false;
   }
 }
@@ -170,10 +171,10 @@ export async function unregisterTokenFromBackend(token: string): Promise<boolean
     // });
     // return response.data.success;
 
-    console.log('Push token unregistered:', token);
+    logger.info('Push token unregistered:', token);
     return true;
   } catch (error) {
-    console.error('Error unregistering token from backend:', error);
+    logger.error('Error unregistering token from backend:', error);
     return false;
   }
 }

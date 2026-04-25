@@ -15,6 +15,7 @@ import PrimaryButton from '../../common/PrimaryButton';
 import QuizCarousel from './QuizCarousel';
 import QuizProgress from './QuizProgress';
 import QuizResults from './QuizResults';
+import logger from '../../../utils/logger';
 
 interface MobileQuizManagerProps {
   quiz: Quiz;
@@ -59,7 +60,7 @@ export default function MobileQuizManager({
       await startQuiz(quiz.id, quiz.sectionId, courseId);
       setCurrentView('questions');
     } catch (error) {
-      console.error('Error starting quiz:', error);
+      logger.error('Error starting quiz:', error);
     }
   };
 
@@ -96,7 +97,7 @@ export default function MobileQuizManager({
         }, 2000);
       }
     } catch (error) {
-      console.error('Error completing quiz:', error);
+      logger.error('Error completing quiz:', error);
     }
   }, [quiz, completeQuiz, navigation, course, onBack]);
 

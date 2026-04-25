@@ -29,6 +29,12 @@ if (__DEV__) {
   LogBox.ignoreLogs([
     "Non-serializable values were found in the navigation state",
   ]);
+} else {
+  // Strip all logs except errors in production for performance and security
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  console.debug = () => {};
 }
 
 export default function App() {

@@ -398,6 +398,8 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                 <Image
                   source={{ uri: profile.avatar }}
                   style={styles.avatar}
+                  accessibilityRole="image"
+                  accessibilityLabel={`${profile.name}'s profile photo`}
                 />
               ) : (
                 <LinearGradient
@@ -429,6 +431,8 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                 <TouchableOpacity
                   style={styles.cancelBtn}
                   onPress={handleCancelEdit}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel profile edits"
                 >
                   <X size={16} color="#64748b" />
                 </TouchableOpacity>
@@ -436,6 +440,9 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                   style={styles.saveBtn}
                   onPress={handleSave}
                   disabled={isSaving}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save profile changes"
+                  accessibilityState={{ disabled: isSaving, busy: isSaving }}
                 >
                   {isSaving ? (
                     <ActivityIndicator size="small" color="#fff" />
