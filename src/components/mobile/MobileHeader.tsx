@@ -6,9 +6,15 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { usePendingRequests } from '../../hooks/usePendingRequests';
 import { useSafeArea } from '../../hooks/useSafeArea';
 
+/**
+ * Props for the MobileHeader component
+ */
 interface MobileHeaderProps {
+    /** Title to display in the header */
     title: string;
+    /** Whether to show the back button */
     showBack?: boolean;
+    /** Optional custom right action component */
     rightAction?: React.ReactNode;
 }
 

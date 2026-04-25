@@ -1,11 +1,19 @@
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, View, StyleSheet } from 'react-native';
 
+/**
+ * Props for the BookmarkButton component
+ */
 interface BookmarkButtonProps {
+  /** Whether the item is currently bookmarked */
   isBookmarked: boolean;
+  /** Callback when the bookmark toggle is pressed */
   onToggle: () => void;
+  /** Whether the button is in a loading state */
   isLoading?: boolean;
+  /** Size variant of the button */
   size?: 'small' | 'medium' | 'large';
+  /** Whether to show the label text */
   showLabel?: boolean;
 }
 
