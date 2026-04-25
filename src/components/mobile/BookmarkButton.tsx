@@ -45,6 +45,10 @@ export default function BookmarkButton({
       onPress={onToggle}
       disabled={isLoading}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+      accessibilityHint="Double tap to toggle lesson bookmark status"
+      accessibilityState={{ disabled: isLoading, selected: isBookmarked, busy: isLoading }}
       style={[
         styles.button,
         {
