@@ -14,15 +14,25 @@ import { ErrorBoundary } from '../common/ErrorBoundary';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+/**
+ * Props for the BiometricPrompt component
+ */
 interface BiometricPromptProps {
-  /** Visible as a modal overlay */
+  /** Whether the biometric prompt modal is visible */
   visible: boolean;
+  /** Type of biometric authentication to use */
   biometricType: BiometricType;
+  /** Whether authentication is in progress */
   isLoading?: boolean;
+  /** Error message to display if authentication fails */
   error?: string | null;
+  /** Callback when user initiates biometric authentication */
   onAuthenticate: () => void;
+  /** Callback when user chooses to use password fallback */
   onFallback: () => void;
+  /** Callback when the modal is dismissed */
   onDismiss: () => void;
+  /** Whether to use dark mode styling */
   isDark?: boolean;
 }
 
@@ -154,10 +164,17 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
 
 // ─── Inline variant (non-modal) ───────────────────────────────────────────────
 
+/**
+ * Props for the BiometricInlineButton component
+ */
 interface BiometricInlineButtonProps {
+  /** Type of biometric authentication to use */
   biometricType: BiometricType;
+  /** Whether authentication is in progress */
   isLoading?: boolean;
+  /** Callback when the button is pressed */
   onPress: () => void;
+  /** Whether to use dark mode styling */
   isDark?: boolean;
 }
 

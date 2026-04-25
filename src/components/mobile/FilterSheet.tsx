@@ -22,27 +22,51 @@ import { ErrorBoundary } from '../common/ErrorBoundary';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = Math.min(SCREEN_HEIGHT * 0.6, 420);
 
+/**
+ * Filter option data structure
+ */
 export interface FilterOption {
+  /** Unique value for the filter option */
   value: string;
+  /** Display label for the filter option */
   label: string;
 }
 
+/**
+ * Filter field data structure
+ */
 export interface FilterField {
+  /** Unique key for the filter field */
   key: string;
+  /** Display label for the filter field */
   label: string;
+  /** Available options for this filter field */
   options: FilterOption[];
 }
 
+/**
+ * Filter values key-value mapping
+ */
 export interface FilterValues {
+  /** Key-value pairs of selected filter values */
   [key: string]: string;
 }
 
+/**
+ * Props for the FilterSheet component
+ */
 export interface FilterSheetProps {
+  /** Whether the filter sheet modal is visible */
   visible: boolean;
+  /** Callback when the modal is closed */
   onClose: () => void;
+  /** Array of filter fields to display */
   filters: FilterField[];
+  /** Currently selected filter values */
   values: FilterValues;
+  /** Callback when filters are applied */
   onApply: (values: FilterValues) => void;
+  /** Optional callback when filters are reset */
   onReset?: () => void;
 }
 
@@ -158,10 +182,17 @@ export function FilterSheet({
   );
 }
 
+/**
+ * Props for the FilterSection component
+ */
 interface FilterSectionProps {
+  /** Label for the filter section */
   label: string;
+  /** Available filter options */
   options: FilterOption[];
+  /** Currently selected value */
   selectedValue?: string;
+  /** Callback when an option is selected */
   onSelect: (value: string) => void;
 }
 

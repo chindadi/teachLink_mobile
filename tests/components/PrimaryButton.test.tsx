@@ -25,6 +25,8 @@ describe('PrimaryButton', () => {
 
         expect(element).toBeTruthy();
         expect(JSON.stringify(element)).toContain('Continue');
+        expect(JSON.stringify(element)).toContain('"accessibilityLabel":"Continue"');
+        expect(JSON.stringify(element)).toContain('"accessibilityRole":"button"');
     });
 
     it('renders loading state for gradient variant', () => {
@@ -35,6 +37,7 @@ describe('PrimaryButton', () => {
         });
 
         expect(element).toBeTruthy();
-        expect(JSON.stringify(element)).not.toContain('Submit');
+        expect(JSON.stringify(element)).toContain('"accessibilityLabel":"Submit"');
+        expect(JSON.stringify(element)).toContain('"busy":true');
     });
 });

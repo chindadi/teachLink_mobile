@@ -31,17 +31,31 @@ const AUTO_HIDE_MS = 3000;
 const DEFAULT_ASPECT_RATIO = 16 / 9;
 const DEFAULT_RATES = [0.75, 1, 1.25, 1.5, 2];
 
+/**
+ * Props for the MobileVideoPlayer component
+ */
 export type MobileVideoPlayerProps = {
+  /** Array of video sources with different quality options */
   sources: VideoSource[];
+  /** URI of the poster image to display before playback */
   posterUri?: string;
+  /** Whether to start playback automatically */
   autoPlay?: boolean;
+  /** Initial playback rate */
   initialRate?: number;
+  /** Available playback rate options */
   rateOptions?: number[];
+  /** ID of the initial quality to use */
   initialQualityId?: string;
+  /** Custom style for the video container */
   style?: StyleProp<ViewStyle>;
+  /** Whether to enable background audio playback */
   enableBackgroundAudio?: boolean;
+  /** Callback when a playback error occurs */
   onError?: (message: string) => void;
+  /** Callback when playback status updates */
   onPlaybackStatusUpdate?: (status: AVPlaybackStatus) => void;
+  /** Callback when video quality changes */
   onQualityChange?: (qualityId: string) => void;
 };
 

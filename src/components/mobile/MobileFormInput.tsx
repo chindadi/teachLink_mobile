@@ -11,14 +11,25 @@ import { Eye, EyeOff, AlertCircle } from 'lucide-react-native';
 import { AppText as Text } from '../common/AppText';
 import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
 
+/**
+ * Props for the MobileFormInput component
+ */
 interface MobileFormInputProps extends TextInputProps {
+  /** Label text for the input field */
   label: string;
+  /** Current value of the input */
   value: string;
+  /** Callback when the input value changes */
   onChangeText: (text: string) => void;
+  /** Error message to display */
   error?: string;
+  /** Hint text to display next to the label */
   hint?: string;
+  /** Icon to display on the left side of the input */
   leftIcon?: React.ReactNode;
+  /** Whether the field is required */
   required?: boolean;
+  /** Whether to use dark mode styling */
   isDark?: boolean;
 }
 
