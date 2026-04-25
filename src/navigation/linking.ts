@@ -2,6 +2,7 @@ import { LinkingOptions } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { NotificationData, NotificationType } from '../types/notifications';
+import { RootStackParamList } from './types';
 import logger from '../utils/logger';
 
 // Define your navigation param list types
