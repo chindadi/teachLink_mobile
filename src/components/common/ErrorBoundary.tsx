@@ -2,24 +2,45 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { crashReportingService } from '../../services/crashReporting';
 
+/**
+ * Props for the ErrorBoundary component
+ */
 interface Props {
+  /** Child components to be wrapped by the error boundary */
   children: ReactNode;
+  /** Fallback UI to display when an error occurs. Can be a React node or a function that receives error info */
   fallback?: ReactNode | ((props: ErrorBoundaryFallbackProps) => ReactNode);
+  /** Optional name for the error boundary to help identify it in error logs */
   boundaryName?: string;
+  /** Callback function called when an error is caught */
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  /** Callback function called when the error boundary is reset */
   onReset?: () => void;
 }
 
+/**
+ * State for the ErrorBoundary component
+ */
 interface State {
+  /** Whether an error has been caught */
   hasError: boolean;
+  /** The error that was caught */
   error: Error | null;
+  /** Additional error information from React */
   errorInfo: ErrorInfo | null;
+  /** Key used to force re-render after reset */
   resetKey: number;
 }
 
+/**
+ * Props passed to the fallback render function
+ */
 export interface ErrorBoundaryFallbackProps {
+  /** The error that was caught */
   error: Error | null;
+  /** Additional error information from React */
   errorInfo: ErrorInfo | null;
+  /** Function to reset the error boundary and retry */
   resetError: () => void;
 }
 

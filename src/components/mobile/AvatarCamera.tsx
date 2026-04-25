@@ -14,10 +14,17 @@ import {
 import { useCamera } from '../../hooks/useCamera';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 
+/**
+ * Props for the AvatarCamera component
+ */
 interface AvatarCameraProps {
+  /** Whether the camera modal is visible */
   visible: boolean;
+  /** Current avatar URI to display */
   currentAvatar?: string | null;
+  /** Callback when a new photo is confirmed */
   onConfirm: (imageUri: string) => void;
+  /** Callback when the modal is closed */
   onClose: () => void;
 }
 

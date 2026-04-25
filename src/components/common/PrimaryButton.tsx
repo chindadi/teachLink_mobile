@@ -10,15 +10,27 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
+/**
+ * Props for the PrimaryButton component
+ */
 interface PrimaryButtonProps {
+  /** Callback function when the button is pressed */
   onPress: () => void;
+  /** Text to display on the button */
   title: string;
+  /** Whether the button is in a loading state */
   loading?: boolean;
+  /** Whether the button is disabled */
   disabled?: boolean;
+  /** Visual style variant of the button */
   variant?: 'gradient' | 'solid' | 'outline';
+  /** Size variant of the button */
   size?: 'small' | 'medium' | 'large';
+  /** Custom style for the button container */
   style?: ViewStyle;
+  /** Custom style for the button text */
   textStyle?: TextStyle;
+  /** Optional icon to display before the title */
   icon?: React.ReactNode;
 }
 

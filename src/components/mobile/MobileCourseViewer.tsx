@@ -22,11 +22,19 @@ import BookmarkButton from "./BookmarkButton";
 import LessonCarousel from "./LessonCarousel";
 import MobileSyllabus from "./MobileSyllabus";
 
+/**
+ * Props for the MobileCourseViewer component
+ */
 interface MobileCourseViewerProps {
+  /** Course data to display */
   course: Course;
+  /** ID of the lesson to start with */
   initialLessonId?: string;
+  /** Initial view mode to display */
   initialViewMode?: ViewMode;
+  /** Optional callback when back button is pressed */
   onBack?: () => void;
+  /** Navigation prop for React Navigation */
   navigation?: NativeStackNavigationProp<RootStackParamList>;
 }
 
