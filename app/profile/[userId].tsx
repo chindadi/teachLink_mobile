@@ -1,4 +1,4 @@
-import { MobileProfile } from '@/src/components/mobile/MobileProfile';
+import { MobileProfile } from '@/src/components';
 import { useAppStore } from '@/src/store';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
