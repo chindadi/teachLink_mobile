@@ -3,11 +3,8 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../global.css"; // NativeWind CSS
-import { ErrorBoundary } from '../src/components/common/ErrorBoundary';
-import { AnalyticsProvider } from "../src/components/mobile/AnalyticsProvider";
-import { OfflineIndicatorProvider } from "../src/components/mobile/OfflineIndicatorProvider";
-import { SwipeableNavigation } from '../src/components/mobile/SwipeableNavigation';
-import { useAnalytics } from '../src/hooks/useAnalytics';
+import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from "../src/components";
+import { useAnalytics } from '../src/hooks';
 
 // Component to handle auto screen tracking
 function ScreenTracker() {
@@ -31,25 +28,25 @@ export default function RootLayout() {
       <AnalyticsProvider>
         <ScreenTracker />
         <OfflineIndicatorProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="course-viewer"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="profile/[userId]"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="search" options={{ headerShown: false }} />
-            <Stack.Screen name="settings" options={{ headerShown: false }} />
-            <Stack.Screen name="quiz" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-          </Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="course-viewer"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="profile/[userId]"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="search" options={{ headerShown: false }} />
+              <Stack.Screen name="settings" options={{ headerShown: false }} />
+              <Stack.Screen name="quiz" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+            </Stack>
           </GestureHandlerRootView>
         </OfflineIndicatorProvider>
-    </AnalyticsProvider>
+      </AnalyticsProvider>
     </ErrorBoundary>
   );
 }

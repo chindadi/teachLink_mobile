@@ -1,11 +1,10 @@
-import React from 'react';
-import { View, TouchableOpacity, StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Settings as SettingsIcon } from 'lucide-react-native';
+import React from 'react';
+import { StatusBar, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppText, MobileSettings } from '../../components';
+import { useDynamicFontSize } from '../../hooks';
 import { useAppStore } from '../../store';
-import { MobileSettings } from '../../components/mobile/MobileSettings';
-import { AppText } from '../../components/common/AppText';
-import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
 
 interface SettingsPageProps {
   /** Callback for the back-navigation button in the header. */
@@ -59,13 +58,13 @@ export default function SettingsPage({
         )}
 
         <View className="flex-1">
-          <AppText 
+          <AppText
             style={{ fontSize: 20 }}
             className="font-bold text-gray-900 dark:text-white"
           >
             Settings
           </AppText>
-          <AppText 
+          <AppText
             style={{ fontSize: 12 }}
             className="text-gray-500 dark:text-gray-400"
           >

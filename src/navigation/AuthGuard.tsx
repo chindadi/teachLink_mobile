@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks";
 
 interface AuthGuardProps {
   children: React.ReactNode;

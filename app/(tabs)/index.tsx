@@ -1,3 +1,5 @@
+import { CourseCardSkeleton, Skeleton, AppText as Text } from "@/src/components";
+import { useDynamicFontSize } from "@/src/hooks";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
@@ -7,13 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { AppText as Text } from "@/src/components/common/AppText";
-import { useDynamicFontSize } from "@/src/hooks/useDynamicFontSize";
 
 import { sampleCourse } from "@/src/data/sampleCourse";
 import { useAppStore } from "@/src/store";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { CourseCardSkeleton } from "@/src/components/mobile/CourseCardSkeleton";
 
 export default function HomeScreen() {
   const router = useRouter();
