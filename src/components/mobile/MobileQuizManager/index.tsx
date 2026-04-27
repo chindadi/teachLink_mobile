@@ -18,11 +18,16 @@ import QuizProgress from './QuizProgress';
 import QuizResults from './QuizResults';
 
 interface MobileQuizManagerProps {
+  /** The quiz data to display and manage */
   quiz: Quiz;
+  /** The ID of the course containing this quiz */
   courseId: string;
+  /** Optional callback for back navigation */
   onBack?: () => void;
-  navigation?: any; // For navigation to syllabus
-  course?: Course; // Course data for navigation
+  /** Navigation prop for programmatic navigation to other screens */
+  navigation?: NativeStackNavigationProp<RootStackParamList>;
+  /** Optional course data for navigation after quiz completion */
+  course?: Course;
 }
 
 type QuizView = 'intro' | 'questions' | 'results';

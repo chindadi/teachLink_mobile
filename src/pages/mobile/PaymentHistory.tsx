@@ -1,34 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  ArrowLeft,
-  RefreshCw,
-  CreditCard,
-  CheckCircle,
-  XCircle,
-  Clock,
-  RotateCcw,
-  Receipt,
-  TrendingUp,
-  Calendar,
+    ArrowLeft,
+    Calendar,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Receipt,
+    RefreshCw,
+    RotateCcw,
+    TrendingUp,
+    XCircle,
 } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { useInAppPurchase } from '../../hooks/useInAppPurchase';
 import {
-  PurchaseRecord,
-  PurchaseStatus,
-  PurchaseType,
-  mobilePaymentsService,
+    PurchaseRecord,
+    PurchaseStatus,
+    PurchaseType,
+    mobilePaymentsService,
 } from '../../services/mobilePayments';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,7 +76,9 @@ const STATUS_CONFIG: Record<
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface PaymentHistoryProps {
+  /** Whether to use dark theme styling */
   isDark?: boolean;
+  /** Optional callback for back navigation */
   onBack?: () => void;
 }
 

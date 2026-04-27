@@ -32,16 +32,27 @@ const DEFAULT_ASPECT_RATIO = 16 / 9;
 const DEFAULT_RATES = [0.75, 1, 1.25, 1.5, 2];
 
 export type MobileVideoPlayerProps = {
+  /** Array of video sources with different quality options */
   sources: VideoSource[];
+  /** Optional poster image URI to display before playback */
   posterUri?: string;
+  /** Whether to start playback automatically when loaded */
   autoPlay?: boolean;
+  /** Initial playback rate (speed) */
   initialRate?: number;
+  /** Available playback rate options */
   rateOptions?: number[];
+  /** Initial quality ID to use for playback */
   initialQualityId?: string;
+  /** Optional style for the video container */
   style?: StyleProp<ViewStyle>;
+  /** Whether to enable background audio playback */
   enableBackgroundAudio?: boolean;
+  /** Callback when a playback error occurs */
   onError?: (message: string) => void;
+  /** Callback when playback status updates */
   onPlaybackStatusUpdate?: (status: AVPlaybackStatus) => void;
+  /** Callback when video quality changes */
   onQualityChange?: (qualityId: string) => void;
 };
 
