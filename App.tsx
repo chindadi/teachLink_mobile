@@ -1,3 +1,13 @@
+import * as Sentry from '@sentry/react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
+import { LogBox } from 'react-native';
+import "./global.css";
+import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import AppNavigator from './src/navigation/AppNavigator';
+import socketService from './src/services/socket';
+import { useAppStore } from './src/store';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
