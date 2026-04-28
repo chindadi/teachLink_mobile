@@ -38,8 +38,8 @@ interface MobileCourseViewerProps {
   initialViewMode?: ViewMode;
   /** Optional callback when back button is pressed */
   onBack?: () => void;
-  /** Navigation prop for React Navigation */
-  navigation?: NativeStackNavigationProp<RootStackParamList>;
+  /** Navigation prop (expo-router compatible) */
+  navigation?: NativeStackNavigationProp<Record<string, object | undefined>>;
 }
 
 type ViewMode = "lesson" | "syllabus" | "notes";
