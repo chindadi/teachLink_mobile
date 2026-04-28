@@ -33,7 +33,7 @@ const prefix = Linking.createURL('/');
  * Deep linking configuration for React Navigation
  */
 export const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [prefix, 'teachlink://'],
+  prefixes: [prefix, 'teachlink://', 'https://teachlink.com', 'https://www.teachlink.com'],
 
   config: {
     screens: {
