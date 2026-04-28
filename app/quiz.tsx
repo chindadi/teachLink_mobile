@@ -4,6 +4,10 @@ import { ActivityIndicator, View } from 'react-native';
 
 const MobileQuizManager = lazy(() => import('@/src/components/mobile/MobileQuizManager'));
 
+const MobileQuizManager = lazyScreen(
+  () => import('@/src/components/mobile/MobileQuizManager')
+);
+
 export default function QuizScreen() {
   const router = useRouter();
   const { quiz, courseId, course } = useLocalSearchParams();

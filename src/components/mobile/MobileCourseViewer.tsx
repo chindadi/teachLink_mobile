@@ -12,17 +12,16 @@ import {
 } from 'react-native';
 import { AppText as Text } from '../common/AppText';
 import { useCourseProgress, useDynamicFontSize } from '../../hooks';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import logger from '../../utils/logger';
-import PrimaryButton from '../common/PrimaryButton';
-import BookmarkButton from './BookmarkButton';
-import LessonCarousel from './LessonCarousel';
-import MobileSyllabus from './MobileSyllabus';
-import { useAnalytics } from '../../hooks/useAnalytics';
-import { RootStackParamList } from '../../navigation/types';
-import { Course, Lesson, Note } from '../../types/course';
-import { AnalyticsEvent, ScreenName } from '../../utils/trackingEvents';
-import { ErrorBoundary } from '../common/ErrorBoundary';
+import { SafeAreaView } from "react-native-safe-area-context";
+import logger from "../../utils/logger";
+import PrimaryButton from "../common/PrimaryButton";
+import BookmarkButton from "./BookmarkButton";
+import LessonCarousel from "./LessonCarousel";
+import MobileSyllabus from "./MobileSyllabus";
+import { useAnalytics } from "../../hooks/useAnalytics";
+import { Course, Lesson, Note } from "../../types/course";
+import { AnalyticsEvent, ScreenName } from "../../utils/trackingEvents";
+import { ErrorBoundary } from "../common/ErrorBoundary";
 
 /**
  * Props for the MobileCourseViewer component
