@@ -27,11 +27,8 @@ interface MobileQuizManagerProps {
   courseId: string;
   /** Optional callback for back navigation */
   onBack?: () => void;
-  /** Navigation prop for programmatic navigation to other screens */
-  navigation?: NativeStackNavigationProp<RootStackParamList>;
-  /** Optional course data for navigation after quiz completion */
-  /** Optional React Navigation prop used to navigate back to CourseViewer after a passed quiz. */
-  navigation?: QuizNavigationProp;
+  /** Optional navigation prop used to navigate back to CourseViewer after a passed quiz. */
+  navigation?: LegacyNavigationProp;
   /** Course data forwarded to the CourseViewer when navigating after quiz completion. */
   course?: Course;
 }
