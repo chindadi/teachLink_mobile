@@ -5,28 +5,6 @@ import { NotificationData, NotificationType } from '../types/notifications';
 import { RootStackParamList } from './types';
 import logger from '../utils/logger';
 
-// Define your navigation param list types
-export type RootStackParamList = {
-  // Main tabs
-  Home: undefined;
-  Courses: undefined;
-  Messages: undefined;
-  Learning: undefined;
-  Community: undefined;
-  Profile: undefined;
-  Achievements: undefined;
-
-  // Detail screens
-  CourseDetail: { courseId: string };
-  Chat: { conversationId: string };
-  AchievementDetail: { achievementId: string };
-  CommunityPost: { postId: string };
-
-  // Settings
-  Settings: undefined;
-  NotificationSettings: undefined;
-};
-
 const prefix = Linking.createURL('/');
 
 /**

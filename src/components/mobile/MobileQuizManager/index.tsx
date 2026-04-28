@@ -13,7 +13,6 @@ import QuizCarousel from './QuizCarousel';
 import QuizProgress from './QuizProgress';
 import QuizResults from './QuizResults';
 import { useAnalytics } from '../../../hooks/useAnalytics';
-import { QuizNavigationProp } from '../../../navigation/types';
 import { useQuizStore } from '../../../store/quizStore';
 import { Quiz, Course } from '../../../types/course';
 import logger from '../../../utils/logger';
