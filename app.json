@@ -13,8 +13,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.jaynomyaro.teachlink",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification"],
+        "NSCameraUsageDescription": "TeachLink uses the camera to scan QR codes and open deep links."
       },
+      "associatedDomains": [
+        "applinks:teachlink.com",
+        "applinks:www.teachlink.com"
+      ],
       "buildNumber": "1",
       "appStoreUrl": "https://apps.apple.com/app/teachlink/id1234567890",
       "privacyPolicy": "https://teachlink.com/privacy",
@@ -35,6 +40,25 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "WAKE_LOCK"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "teachlink.com",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.teachlink.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"],
+          "autoVerify": true
+        }
       ],
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.jaynomyaro.teachlink",
       "privacyPolicy": "https://teachlink.com/privacy",
