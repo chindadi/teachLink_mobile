@@ -18,13 +18,19 @@ import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 import { handleNotificationReceived } from './src/utils/notificationHandlers';
 
+import { apiClient } from './src/services/api';
+import { crashReportingService } from './src/services/cashReporting';
+import { requestQueue } from './src/services/requestQueue';
+import { requireEnvVariables } from './src/utils/env';
+import { logger } from './src/utils/logger';
+
 // SHOW_STORYBOOK flag based on environment variable
 const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
 
-// Initialization and environment checks
+// Centralized logging is handled by src/utils/logger.
+// Suppress known non-actionable navigation warnings in all environments.
 requireEnvVariables();
 
-// Centralized logging is handled by src/utils/logger.
 if (__DEV__) {
   logger.debug('Development mode: centralized logger active');
   LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
