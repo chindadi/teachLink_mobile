@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
@@ -17,25 +18,29 @@ import {
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 import { handleNotificationReceived } from './src/utils/notificationHandlers';
-
 import { apiClient } from './src/services/api';
 import { crashReportingService } from './src/services/cashReporting';
 import { requestQueue } from './src/services/requestQueue';
 import { requireEnvVariables } from './src/utils/env';
-import { logger } from './src/utils/logger';
+import { appLogger } from './src/utils/logger';
+import { initializeLogging } from './src/config/logging';
 
 // SHOW_STORYBOOK flag based on environment variable
 const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
 
-// Centralized logging is handled by src/utils/logger.
-// Suppress known non-actionable navigation warnings in all environments.
+// Centralized structured logging initialized on startup
 requireEnvVariables();
 
+// Initialize centralized logging on app start
+initializeLogging().catch((err) => {
+  console.error('[App] Failed to initialize logging:', err);
+});
+
 if (__DEV__) {
-  logger.debug('Development mode: centralized logger active');
+  appLogger.infoSync('Development mode: centralized logger active');
   LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 } else {
-  // Strip all logs except errors in production for performance and security
+  // Strip all logs except errors in production for performance
   console.log = () => {};
   console.info = () => {};
   console.warn = () => {};
@@ -55,7 +60,7 @@ const App = () => {
     // Add global handler for unhandled promise rejections
     const unhandledRejectionHandler = (reason: any) => {
       const error = reason instanceof Error ? reason : new Error(String(reason));
-      logger.error('Unhandled Promise Rejection:', error);
+      appLogger.errorSync('Unhandled Promise Rejection', error);
       crashReportingService.reportError(error, 'UnhandledPromiseRejection');
     };
 
@@ -67,6 +72,16 @@ const App = () => {
 
     // Connect to socket when app starts
     socketService.connect();
+
+    // Initialize push notifications: request permissions and get device token
+    registerForPushNotifications().then(async (token) => {
+      if (token) {
+        const { setPushToken, setTokenRegistered } = useNotificationStore.getState();
+        setPushToken(token);
+        const registered = await registerTokenWithBackend(token);
+        setTokenRegistered(registered);
+      }
+    });
 
     // Start request queue monitoring
     requestQueue.startMonitoring(apiClient);
@@ -80,7 +95,7 @@ const App = () => {
     // Check if app was launched from a notification
     getLastNotificationResponse().then((response) => {
       if (response) {
-        console.log('App launched from notification:', response);
+        appLogger.infoSync('App launched from notification', { response });
       }
     });
 
@@ -133,7 +148,8 @@ const App = () => {
             refreshedSession.tokens.expiresAt
           );
           setSessionExpiringSoon(false);
-        } catch {
+        } catch (error) {
+          appLogger.errorSync('Failed to refresh session on app foreground', error as Error);
           logout();
           Alert.alert('Session expired', 'We could not refresh your session. Please log in again.');
         }

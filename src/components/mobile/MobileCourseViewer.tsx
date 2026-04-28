@@ -19,7 +19,6 @@ import BookmarkButton from "./BookmarkButton";
 import LessonCarousel from "./LessonCarousel";
 import MobileSyllabus from "./MobileSyllabus";
 import { useAnalytics } from "../../hooks/useAnalytics";
-import { RootStackParamList } from "../../navigation/types";
 import { Course, Lesson, Note } from "../../types/course";
 import { AnalyticsEvent, ScreenName } from "../../utils/trackingEvents";
 import { ErrorBoundary } from "../common/ErrorBoundary";
