@@ -6,11 +6,12 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { AppText as Text } from "../common/AppText";
+import { useDynamicFontSize } from "../../hooks/useDynamicFontSize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCourseProgress } from "../../hooks/useCourseProgress";
 import { RootStackParamList } from "../../navigation/types";
@@ -22,11 +23,19 @@ import BookmarkButton from "./BookmarkButton";
 import LessonCarousel from "./LessonCarousel";
 import MobileSyllabus from "./MobileSyllabus";
 
+/**
+ * Props for the MobileCourseViewer component
+ */
 interface MobileCourseViewerProps {
+  /** Course data to display */
   course: Course;
+  /** ID of the lesson to start with */
   initialLessonId?: string;
+  /** Initial view mode to display */
   initialViewMode?: ViewMode;
+  /** Optional callback when back button is pressed */
   onBack?: () => void;
+  /** Navigation prop for React Navigation */
   navigation?: NativeStackNavigationProp<RootStackParamList>;
 }
 
@@ -39,6 +48,7 @@ export default function MobileCourseViewer({
   onBack,
   navigation,
 }: MobileCourseViewerProps) {
+  const { scale } = useDynamicFontSize();
   const [viewMode, setViewMode] = useState<ViewMode>(
     initialViewMode || "lesson",
   );
@@ -385,7 +395,7 @@ export default function MobileCourseViewer({
         </View>
 
         {/* Progress Bar */}
-        <View style={styles.progressBarContainer}>
+        <View style={[styles.progressBarContainer, { height: scale(8) }]}>
           <View
             style={[styles.progressBar, { width: `${overallProgress}%` }]}
           />

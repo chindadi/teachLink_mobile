@@ -9,13 +9,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Quiz, Course } from '../../../types/course';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../navigation/types';
+import { QuizNavigationProp } from '../../../navigation/types';
 import { useQuizStore } from '../../../store/quizStore';
 import PrimaryButton from '../../common/PrimaryButton';
 import QuizCarousel from './QuizCarousel';
 import QuizProgress from './QuizProgress';
 import QuizResults from './QuizResults';
+import logger from '../../../utils/logger';
 
 interface MobileQuizManagerProps {
   /** The quiz data to display and manage */
@@ -27,6 +27,9 @@ interface MobileQuizManagerProps {
   /** Navigation prop for programmatic navigation to other screens */
   navigation?: NativeStackNavigationProp<RootStackParamList>;
   /** Optional course data for navigation after quiz completion */
+  /** Optional React Navigation prop used to navigate back to CourseViewer after a passed quiz. */
+  navigation?: QuizNavigationProp;
+  /** Course data forwarded to the CourseViewer when navigating after quiz completion. */
   course?: Course;
 }
 
@@ -63,7 +66,7 @@ export default function MobileQuizManager({
       await startQuiz(quiz.id, quiz.sectionId, courseId);
       setCurrentView('questions');
     } catch (error) {
-      console.error('Error starting quiz:', error);
+      logger.error('Error starting quiz:', error);
     }
   };
 
@@ -100,7 +103,7 @@ export default function MobileQuizManager({
         }, 2000);
       }
     } catch (error) {
-      console.error('Error completing quiz:', error);
+      logger.error('Error completing quiz:', error);
     }
   }, [quiz, completeQuiz, navigation, course, onBack]);
 

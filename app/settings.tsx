@@ -1,26 +1,21 @@
 import { useAppStore } from '@/src/store';
-import React from 'react';
-import { Switch, Text, View } from 'react-native';
+import React, { lazy, Suspense } from 'react';
+import { ActivityIndicator, Switch, View } from 'react-native';
+import { AppText } from '@/src/components/common/AppText';
+
+const MobileSettings = lazy(() => import('@/src/components/mobile/MobileSettings'));
 
 export default function SettingsScreen() {
-    const { theme, setTheme } = useAppStore();
-    const isDark = theme === 'dark';
+  const { theme, setTheme } = useAppStore();
+  const isDark = theme === 'dark';
 
-    return (
-        <View className="flex-1 bg-white dark:bg-gray-900 p-4">
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Settings
-            </Text>
-
-            <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-gray-900 dark:text-white text-lg">
-                    Dark Mode
-                </Text>
-                <Switch
-                    value={isDark}
-                    onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
-                />
-            </View>
-        </View>
-    );
+  return (
+    <Suspense fallback={
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    }>
+      <MobileSettings />
+    </Suspense>
+  );
 }
