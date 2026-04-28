@@ -4,6 +4,10 @@ import { ActivityIndicator, View } from 'react-native';
 
 const MobileCourseViewer = lazy(() => import('@/src/components/mobile/MobileCourseViewer'));
 
+const MobileCourseViewer = lazyScreen(
+  () => import('@/src/components/mobile/MobileCourseViewer')
+);
+
 export default function CourseViewerScreen() {
   const router = useRouter();
   const { course, initialLessonId, initialViewMode } = useLocalSearchParams();
