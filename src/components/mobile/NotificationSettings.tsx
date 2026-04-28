@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Switch, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useNotificationPermission } from '../../hooks/useNotificationPermission';
 import { useNotificationStore } from '../../store/notificationStore';
 import { NotificationPreferences } from '../../types/notifications';
@@ -52,16 +52,29 @@ export function NotificationSettings() {
   const { permissionStatus, requestPermission, openSettings, isLoading } =
     useNotificationPermission();
   const { preferences, setPreference, pushToken } = useNotificationStore();
+  const [savingKey, setSavingKey] = useState<keyof NotificationPreferences | null>(null);
 
   const isEnabled = permissionStatus === 'granted' && pushToken !== null;
 
-  const handlePreferenceChange = (
+  const handlePreferenceChange = async (
     key: keyof NotificationPreferences,
     value: boolean
   ) => {
-    setPreference(key, value);
-    // TODO: Sync with backend
-    // api.updateNotificationPreferences({ [key]: value });
+    try {
+      setSavingKey(key);
+      // Update local preferences (automatically persisted by Zustand)
+      setPreference(key, value);
+      
+      // TODO: Sync with backend
+      // try {
+      //   await api.updateNotificationPreferences({ [key]: value });
+      // } catch (error) {
+      //   console.error('Failed to sync notification preferences:', error);
+      //   // Preferences are still saved locally even if sync fails
+      // }
+    } finally {
+      setSavingKey(null);
+    }
   };
 
   return (
