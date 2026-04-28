@@ -7,12 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  # ── JS-level build verification ──────────────────────────────────────────────
-  # Runs on Linux: bundles JS for both platforms and checks TypeScript types.
-  # Catches import errors, type errors, and broken module resolution without
-  # requiring native toolchains.
-  build:
-    name: Build Verification (JS bundles + TypeScript)
+  # ── Quality gate: lint, typecheck, tests ──────────────────────────────────────
+  quality:
+    name: Lint, Typecheck & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,8 +23,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: TypeScript type check
         run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test -- --runInBand
+
+  # ── JS-level build verification ──────────────────────────────────────────────
+  # Runs on Linux: bundles JS for both platforms.
+  # Catches import errors and broken module resolution without
+  # requiring native toolchains.
+  build:
+    name: Build Verification (JS bundles)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Verify Android bundle
         run: npx expo export --platform android
