@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { LogBox } from 'react-native';
@@ -16,15 +15,6 @@ import {
     removeNotificationListener,
 } from './src/services/pushNotifications';
 import { handleNotificationReceived } from './src/utils/notificationHandlers';
-
-// Initialize Sentry for performance monitoring and crash reporting
-Sentry.init({
-  dsn: 'https://your-dsn-here@sentry.io/project-id',
-  enableAutoSessionTracking: true,
-  enableNativeCrashHandling: true,
-  environment: __DEV__ ? 'development' : 'production',
-  debug: __DEV__,
-});
 
 // Enable error logging to console (visible in Metro bundler)
 if (__DEV__) {
@@ -70,9 +60,9 @@ export default function App() {
   }, []);
 
   return (
-    <Sentry.ErrorBoundary fallback={<ErrorBoundary />}>
+    <ErrorBoundary>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <AppNavigator />
-    </Sentry.ErrorBoundary>
+    </ErrorBoundary>
   );
 }
