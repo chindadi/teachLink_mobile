@@ -8,14 +8,13 @@ import { ImageCache } from '@/utils/imageCache';
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 jest.mock('expo-image', () => ({
-  Image: {
-    prefetch: jest.fn(() => Promise.resolve(true)),
-    clearMemoryCache: jest.fn(() => Promise.resolve()),
-    clearDiskCache: jest.fn(() => Promise.resolve()),
-  },
+  Image: 'ExpoImage',
+  prefetch: jest.fn(() => Promise.resolve(true)),
+  clearMemoryCache: jest.fn(() => Promise.resolve()),
+  clearDiskCache: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('../src/utils/logger', () => ({
+jest.mock('@/utils/logger', () => ({
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
