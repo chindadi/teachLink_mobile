@@ -230,3 +230,49 @@ These profiles can also be used when submitting:
 - `eas submit --profile production` will use the production credentials defined in the `submit.production` section of `eas.json`.
 
 Refer to the official EAS docs for more details.
+
+
+---
+
+## 🚀 Deployment
+
+TeachLink Mobile uses **Expo Application Services (EAS)** for building and submitting to the app stores.
+
+> 📖 For the full deployment guide, see **[DEPLOY.md](./DEPLOY.md)**
+
+### Quick Start
+
+```bash
+# Install EAS CLI
+npm install -g eas-cli
+
+# Authenticate
+eas login
+
+# Deploy to Android
+npm run deploy:android
+
+# Deploy to iOS
+npm run deploy:ios
+
+# Deploy to both stores
+npm run deploy:both
+
+# Create a preview build for testing
+npm run deploy:preview
+```
+
+### Environment Setup
+
+Create a `.env` file in the project root:
+
+```env
+EXPO_PUBLIC_API_BASE_URL=https://api.teachlink.com
+EXPO_PUBLIC_SOCKET_URL=wss://api.teachlink.com
+EXPO_PUBLIC_APP_ENV=production
+EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS=true
+```
+
+> ⚠️ Never commit your `.env` file. It is listed in `.gitignore`.
+
+See [DEPLOY.md](./DEPLOY.md) for platform-specific setup (Google Play & App Store), build profiles, troubleshooting, and security notes.
