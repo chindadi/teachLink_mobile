@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import { CachedImage } from '../src/components/ui/CachedImage';
-import { usePrefetchImages } from '../src/hooks/usePrefetchImages';
-import { ImageCache } from '../src/utils/imageCache';
+import { CachedImage } from '@components/ui/CachedImage';
+import { usePrefetchImages } from '@hooks/usePrefetchImages';
+import { ImageCache } from '@utils/imageCache';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
