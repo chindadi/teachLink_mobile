@@ -1,57 +1,57 @@
 import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
-import { LogBox } from 'react-native';
-import "./global.css";
-import { ErrorBoundary } from './src/components/common/ErrorBoundary';
-import AppNavigator from './src/navigation/AppNavigator';
-import socketService from './src/services/socket';
-import { useAppStore } from './src/store';
-import React, { useEffect, useRef } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
-import "./global.css";
+
+import './global.css';
+import StorybookUI from './.rnstorybook';
+
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import { AuthProvider } from './src/hooks';
 import AppNavigator from './src/navigation/AppNavigator';
-import mobileAuthService from './src/services/mobileAuth';
+import { setupNotificationNavigation } from './src/navigation/linking';
+import { mobileAuthService } from './src/services/mobileAuth';
+import {
+  addNotificationReceivedListener,
+  getLastNotificationResponse,
+  removeNotificationListener,
+} from './src/services/pushNotifications';
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
-
+import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { apiClient } from './src/services/api';
 import { crashReportingService } from './src/services/cashReporting';
 import { requestQueue } from './src/services/requestQueue';
 import { requireEnvVariables } from './src/utils/env';
-import { logger } from './src/utils/logger';
+import { appLogger } from './src/utils/logger';
+import { initializeLogging } from './src/config/logging';
 
-// Notification imports
-import { setupNotificationNavigation } from './src/navigation/linking';
-import {
-    addNotificationReceivedListener,
-    getLastNotificationResponse,
-    removeNotificationListener,
-} from './src/services/pushNotifications';
-import { handleNotificationReceived } from './src/utils/notificationHandlers';
+// SHOW_STORYBOOK flag based on environment variable
+const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
 
-// Centralized logging is handled by src/utils/logger.
-// Suppress known non-actionable navigation warnings in all environments.
+
+// Centralized structured logging initialized on startup
 requireEnvVariables();
 
+// Initialize centralized logging on app start
+initializeLogging().catch(err => {
+  console.error('[App] Failed to initialize logging:', err);
+});
+
 if (__DEV__) {
-  logger.debug("Development mode: centralized logger active");
-  LogBox.ignoreLogs([
-    "Non-serializable values were found in the navigation state",
-  ]);
+  appLogger.infoSync('Development mode: centralized logger active');
+  LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 } else {
-  // Strip all logs except errors in production for performance and security
+  // Strip all logs except errors in production for performance
   console.log = () => {};
   console.info = () => {};
   console.warn = () => {};
   console.debug = () => {};
 }
 
-export default function App() {
+const App = () => {
   const theme = useAppStore((state) => state.theme);
+
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const SESSION_REFRESH_WINDOW_MS = 5 * 60 * 1000;
@@ -62,10 +62,9 @@ export default function App() {
 
     // Add global handler for unhandled promise rejections
     const unhandledRejectionHandler = (reason: any) => {
-      const error =
-        reason instanceof Error ? reason : new Error(String(reason));
-      logger.error("Unhandled Promise Rejection:", error);
-      crashReportingService.reportError(error, "UnhandledPromiseRejection");
+      const error = reason instanceof Error ? reason : new Error(String(reason));
+      appLogger.errorSync('Unhandled Promise Rejection', error);
+      crashReportingService.reportError(error, 'UnhandledPromiseRejection');
     };
 
     // Register unhandled rejection listener
@@ -77,6 +76,16 @@ export default function App() {
     // Connect to socket when app starts
     socketService.connect();
 
+    // Initialize push notifications: request permissions and get device token
+    registerForPushNotifications().then(async (token) => {
+      if (token) {
+        const { setPushToken, setTokenRegistered } = useNotificationStore.getState();
+        setPushToken(token);
+        const registered = await registerTokenWithBackend(token);
+        setTokenRegistered(registered);
+      }
+    });
+
     // Start request queue monitoring
     requestQueue.startMonitoring(apiClient);
 
@@ -84,14 +93,12 @@ export default function App() {
     const notificationCleanup = setupNotificationNavigation();
 
     // Listen for notifications received while app is foregrounded
-    const subscription = addNotificationReceivedListener(
-      handleNotificationReceived,
-    );
+    const subscription = addNotificationReceivedListener(handleNotificationReceived);
 
     // Check if app was launched from a notification
-    getLastNotificationResponse().then((response) => {
+    getLastNotificationResponse().then(response => {
       if (response) {
-        console.log("App launched from notification:", response);
+        appLogger.infoSync('App launched from notification', { response });
       }
     });
 
@@ -141,15 +148,13 @@ export default function App() {
           setTokens(
             refreshedSession.tokens.accessToken,
             refreshedSession.tokens.refreshToken,
-            refreshedSession.tokens.expiresAt,
+            refreshedSession.tokens.expiresAt
           );
           setSessionExpiringSoon(false);
-        } catch {
+        } catch (error) {
+          appLogger.errorSync('Failed to refresh session on app foreground', error as Error);
           logout();
-          Alert.alert(
-            'Session expired',
-            'We could not refresh your session. Please log in again.',
-          );
+          Alert.alert('Session expired', 'We could not refresh your session. Please log in again.');
         }
       } else {
         setSessionExpiringSoon(false);
@@ -158,7 +163,7 @@ export default function App() {
 
     checkSessionOnForeground();
 
-    const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
+    const appStateSubscription = AppState.addEventListener('change', nextAppState => {
       const wasInBackground = appStateRef.current.match(/inactive|background/);
       const isForegrounded = nextAppState === 'active';
 
@@ -172,12 +177,16 @@ export default function App() {
     return () => {
       appStateSubscription.remove();
     };
-  }, []);
+  }, [SESSION_REFRESH_WINDOW_MS]);
 
   return (
     <ErrorBoundary>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <AppNavigator />
+      <AuthProvider>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <AppNavigator />
+      </AuthProvider>
     </ErrorBoundary>
   );
-}
+};
+
+export default SHOW_STORYBOOK ? StorybookUI : App;
