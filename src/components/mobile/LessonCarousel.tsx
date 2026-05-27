@@ -198,6 +198,7 @@ export default function LessonCarousel({
         ref={scrollViewRef}
         horizontal
         pagingEnabled
+        removeClippedSubviews={true}
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumScrollEnd}
@@ -213,6 +214,7 @@ export default function LessonCarousel({
               style={styles.lessonScrollView}
               contentContainerStyle={styles.lessonContent}
               showsVerticalScrollIndicator={true}
+              removeClippedSubviews={true}
             >
               {renderLessonContent(lesson)}
             </ScrollView>

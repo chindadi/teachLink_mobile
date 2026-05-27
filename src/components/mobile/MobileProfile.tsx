@@ -254,7 +254,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
 
     return (
       <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} removeClippedSubviews={true}>
           <View>
             <Skeleton width="100%" height={120} borderRadius={0} />
             <View style={styles.avatarRow}>
@@ -412,7 +412,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} removeClippedSubviews={true}>
         {/* ── Profile Header ─────────────────────────────────────────────── */}
         <View>
           <LinearGradient
@@ -699,7 +699,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                   <Text style={styles.streakEmoji}>🔥</Text>
                   <View>
                     <Text style={styles.streakValue}>{profile.stats.streak} Day Streak</Text>
-                    <Text style={styles.streakSub}>Keep it up! You're on fire.</Text>
+                    <Text style={styles.streakSub}>Keep it up! You&apos;re on fire.</Text>
                   </View>
                 </LinearGradient>
               </View>

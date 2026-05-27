@@ -231,8 +231,7 @@ export function MobileSettings({
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      {/* ACCOUNT */}
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900" removeClippedSubviews={true}>
       <SettingsSection title="Account">
         <SettingRow
           icon={<Eye size={18} color="#6366f1" />}

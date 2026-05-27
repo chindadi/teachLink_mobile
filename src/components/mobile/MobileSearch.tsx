@@ -9,18 +9,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import { AppText as Text } from '../common/AppText';
+import { useAnalytics, useDebounce, useDynamicFontSize, useMemoryMonitor } from '../../hooks';
+import { AnalyticsEvent } from '../../utils/trackingEvents';
 import { FilterField, FilterSheet, FilterValues } from './FilterSheet';
 import { SearchHistory } from './SearchHistory';
 import { SearchResultCard, SearchResultItem } from './SearchResultCard';
-import { VoiceSearch } from './VoiceSearch';
-import { sampleCourse } from '../../data/sampleCourse';
-import { useAnalytics, useDebounce, useDynamicFontSize, useMemoryMonitor } from '../../hooks';
-import { Course } from '../../types/course';
 import { addToSearchHistory } from '../../utils/searchHistory';
-import { AnalyticsEvent } from '../../utils/trackingEvents';
 import { validateSearchQuery } from '../../utils/validation';
-import { AppText as Text } from '../common/AppText';
+import { sampleCourse } from '../../data/sampleCourse';
+import { Course } from '../../types/course';
+import { VoiceSearch } from './VoiceSearch';
 
 const DEFAULT_FILTERS: FilterField[] = [
   {
@@ -147,6 +146,7 @@ export const MobileSearch = ({
     }
   }, [debouncedQuery, performSearch]);
 
+
   const handleSubmit = useCallback(() => {
     performSearch(query);
   }, [query, performSearch]);
@@ -198,10 +198,7 @@ export const MobileSearch = ({
             placeholder={placeholder}
             placeholderTextColor="#9CA3AF"
             value={query}
-            onChangeText={text => {
-              setQuery(text);
-              setQueryError(null);
-            }}
+            onChangeText={(text) => { setQuery(text); setQueryError(null); }}
             onFocus={() => setSuggestionsVisible(true)}
             onBlur={() => setTimeout(() => setSuggestionsVisible(false), 180)}
             onSubmitEditing={handleSubmit}
@@ -267,7 +264,7 @@ export const MobileSearch = ({
             renderItem={({ item }) => (
               <SearchResultCard item={item} onPress={() => onResultPress?.(item)} />
             )}
-            removeClippedSubviews
+            removeClippedSubviews={true}
             contentContainerStyle={styles.resultsList}
             ListEmptyComponent={
               <Text style={styles.emptyText}>Try a different query or adjust filters.</Text>

@@ -187,6 +187,7 @@ export const MobileLogin: React.FC<MobileLoginProps> = ({
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
         >
           {/* ── Header ── */}
           <View style={styles.header}>
@@ -377,7 +378,7 @@ export const MobileLogin: React.FC<MobileLoginProps> = ({
           {onRegister && (
             <View style={styles.registerRow}>
               <Text allowFontScaling={false} style={[styles.registerText, { color: textSecondary }]}>
-                Don't have an account?
+                Don&apos;t have an account?
               </Text>
               <TouchableOpacity onPress={onRegister}>
                 <Text allowFontScaling={false} style={[styles.registerLink, { color: accentColor }]}>

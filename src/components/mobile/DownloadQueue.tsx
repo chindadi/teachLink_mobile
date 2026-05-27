@@ -1,12 +1,11 @@
 import { Trash2 } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
-
 import { useDownloads } from '../../hooks/useDownloads';
 import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
 import { AppText } from '../common/AppText';
 
-export const DownloadQueue = () => {
+export function DownloadQueue() {
   const { tasks, removeDownload } = useDownloads();
   const { scale } = useDynamicFontSize();
 
@@ -56,7 +55,7 @@ export const DownloadQueue = () => {
       data={tasks}
       keyExtractor={item => item.id}
       renderItem={renderItem}
-      removeClippedSubviews
+      removeClippedSubviews={true}
       contentContainerStyle={{ paddingVertical: 8 }}
       ListHeaderComponent={() => (
         <AppText className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -65,4 +64,4 @@ export const DownloadQueue = () => {
       )}
     />
   );
-};
+}

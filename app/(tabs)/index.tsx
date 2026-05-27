@@ -2,11 +2,11 @@ import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { CourseCardSkeleton, Skeleton, AppText as Text } from '@/src/components';
-import { sampleCourse } from '@/src/data/sampleCourse';
-import { useDynamicFontSize, useAnalytics } from '@/src/hooks';
-import { useAppStore } from '@/src/store';
-import { AnalyticsEvent, ScreenName } from '@/src/utils/trackingEvents';
+import { CourseCardSkeleton, Skeleton, AppText as Text } from '@/components';
+import { sampleCourse } from '@/data/sampleCourse';
+import { useDynamicFontSize, useAnalytics } from '@/hooks';
+import { useAppStore } from '@/store';
+import { AnalyticsEvent, ScreenName } from '@/utils/trackingEvents';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -71,6 +71,7 @@ export default function HomeScreen() {
       className="flex-1 bg-gray-50 dark:bg-slate-800"
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      removeClippedSubviews={true}
     >
       {/* Header */}
       <View style={styles.headerSection}>

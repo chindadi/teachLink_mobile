@@ -88,6 +88,7 @@ export default function QuizCarousel({
         ref={scrollViewRef}
         horizontal
         pagingEnabled
+        removeClippedSubviews={true}
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         onScrollBeginDrag={handleScrollBeginDrag}

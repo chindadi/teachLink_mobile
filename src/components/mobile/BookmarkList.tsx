@@ -19,7 +19,7 @@ export default function BookmarkList() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.list}>
+    <ScrollView contentContainerStyle={styles.list} removeClippedSubviews={true}>
       {bookmarks.map(item => (
         <TouchableOpacity
           key={item.itemId}

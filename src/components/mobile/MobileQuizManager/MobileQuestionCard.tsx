@@ -68,6 +68,7 @@ export default function MobileQuestionCard({
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      removeClippedSubviews={true}
     >
       {/* Question Header */}
       <View style={styles.header}>
