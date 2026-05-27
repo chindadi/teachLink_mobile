@@ -1,33 +1,25 @@
-/**
- * Lazy Loading Tests
- *
- * Tests for code splitting, lazy component loading, Suspense fallbacks,
- * and bundle size optimization.
- */
 
-import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react-native';
-import { Suspense } from 'react';
+
+import { render, screen, waitFor } from '@testing-library/react-native';
+import React, { Suspense } from 'react';
 import {
-  createLazyComponent,
-  SuspenseWithFallback,
-  LazyLoadingFallback,
-  lazyLoadingTracker,
-  useLazyLoadMetrics,
-  useAllLazyLoadMetrics,
-} from '../utils/lazyLoading';
+    CardSkeleton,
+    DataGridSkeleton,
+    ProfileSkeleton,
+    VideoPlayerSkeleton,
+} from '../components/loadingSkeletons';
 import {
-  LazyMobileVideoPlayer,
-  LazyAdvancedDataGrid,
-  lazyComponentRegistry,
-  getEstimatedBundleSavings,
+    getEstimatedBundleSavings,
+    lazyComponentRegistry
 } from '../utils/lazyComponents';
 import {
-  VideoPlayerSkeleton,
-  DataGridSkeleton,
-  ProfileSkeleton,
-  CardSkeleton,
-} from '../components/loadingSkeletons';
+    createLazyComponent,
+    LazyLoadingFallback,
+    lazyLoadingTracker,
+    SuspenseWithFallback,
+    useAllLazyLoadMetrics,
+    useLazyLoadMetrics,
+} from '../utils/lazyLoading';
 
 describe('Lazy Loading System', () => {
   beforeEach(() => {

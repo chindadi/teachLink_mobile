@@ -5,7 +5,7 @@
  * with performance tracking, error boundaries, and loading states.
  */
 
-import React, { Suspense, ComponentType, ReactNode, LazyExoticComponent } from 'react';
+import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense } from 'react';
 
 /**
  * Performance metrics for lazy-loaded components

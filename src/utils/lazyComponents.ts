@@ -5,7 +5,6 @@
  * and bundle size optimization.
  */
 
-import { ComponentType } from 'react';
 import { createLazyComponent } from './lazyLoading';
 
 /**
