@@ -1,15 +1,18 @@
-import { Stack, useRouter, usePathname, useSegments } from "expo-router";
-import React, { useCallback, useEffect } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
-import "../global.css"; // NativeWind CSS
-import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from "../src/components";
+import { Stack, useRouter, usePathname, useSegments } from 'expo-router';
+import { useColorScheme } from 'nativewind';
+import React, { useCallback, useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
+
+import '../global.css'; // NativeWind CSS
+import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from '../src/components';
 import { useAnalytics } from '../src/hooks';
 import { useDeepLink } from '../src/hooks/useDeepLink';
+import { useAppStore } from '../src/store';
 import { getPathFromDeepLink } from '../src/utils/linkParser';
 
 // Component to handle auto screen tracking
-function ScreenTracker() {
+const ScreenTracker = () => {
   const pathname = usePathname();
   const segments = useSegments();
   const { trackScreen } = useAnalytics();
@@ -22,17 +25,32 @@ function ScreenTracker() {
   }, [pathname, segments, trackScreen]);
 
   return null;
-}
+};
 
-export default function RootLayout() {
+// Sync global theme to NativeWind colorScheme
+const ThemeSync = () => {
+  const { theme } = useAppStore();
+  const { setColorScheme } = useColorScheme();
+
+  useEffect(() => {
+    setColorScheme(theme);
+  }, [theme, setColorScheme]);
+
+  return null;
+};
+
+const RootLayout = () => {
   const router = useRouter();
 
-  const handleDeepLink = useCallback((deepLink) => {
-    const path = getPathFromDeepLink(deepLink);
-    if (path) {
-      router.replace(path);
-    }
-  }, [router]);
+  const handleDeepLink = useCallback(
+    deepLink => {
+      const path = getPathFromDeepLink(deepLink);
+      if (path) {
+        router.replace(path);
+      }
+    },
+    [router]
+  );
 
   useDeepLink(handleDeepLink);
 
@@ -40,6 +58,7 @@ export default function RootLayout() {
     <ErrorBoundary boundaryName="RootLayout">
       <AnalyticsProvider>
         <ScreenTracker />
+        <ThemeSync />
         <OfflineIndicatorProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Stack>
@@ -57,4 +76,6 @@ export default function RootLayout() {
       </AnalyticsProvider>
     </ErrorBoundary>
   );
-}
+};
+
+export default RootLayout;
