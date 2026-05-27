@@ -1,3 +1,4 @@
+export * from './useAdaptiveTheme';
 export * from './useAnalytics';
 export { AuthProvider, useAuth } from './useAuth';
 export * from './useBiometricAuth';
@@ -21,3 +22,4 @@ export * from './useScreenReader';
 export * from './useSwipe';
 export * from './useVideoGestures';
 export * from './useVoiceRecognition';
+export * from './useDebounce';
