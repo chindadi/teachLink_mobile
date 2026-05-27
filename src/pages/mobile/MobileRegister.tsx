@@ -1,4 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { AlertCircle, BookOpen, Lock, Mail, User } from 'lucide-react-native';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -11,9 +13,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { AlertCircle, BookOpen, Lock, Mail, User } from 'lucide-react-native';
 import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
+import { useFormCache } from '../../hooks/useFormCache';
+import { cacheFormValues } from '../../services/formCache';
 import {
   getPasswordStrength,
   validateConfirmPassword,
@@ -52,8 +54,11 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
   const confirmRef = useRef<TextInput>(null);
 
   const { scale } = useDynamicFontSize();
+  const { applyPrefillToFields, isLoading: formCacheLoading, prefillValues } = useFormCache([
+    'fullName',
+    'email',
+  ]);
   const styles = createStyles(scale);
-
   const bg = isDark ? '#0f172a' : '#f8fafc';
   const cardBg = isDark ? '#1e293b' : '#fff';
   const textPrimary = isDark ? '#f1f5f9' : '#1e293b';
@@ -63,6 +68,11 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
   const inputBg = isDark ? '#0f172a' : '#f8fafc';
 
   const passwordStrength = getPasswordStrength(password);
+
+  useEffect(() => {
+    if (formCacheLoading) return;
+    applyPrefillToFields({ fullName: name, email }, { fullName: setName, email: setEmail });
+  }, [applyPrefillToFields, email, formCacheLoading, name, prefillValues]);
 
   function clearFieldError(field: keyof FieldErrors) {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -90,6 +100,7 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
     try {
       // Registration API call would go here
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      await cacheFormValues({ fullName: name.trim(), email: email.trim().toLowerCase() });
       onRegisterSuccess?.();
     } finally {
       setIsLoading(false);
