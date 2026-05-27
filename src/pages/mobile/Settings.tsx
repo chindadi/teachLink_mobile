@@ -4,7 +4,7 @@ import { StatusBar, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, MobileSettings } from '../../components';
 import { useDynamicFontSize } from '../../hooks';
-import { useAppStore } from '../../store';
+import { useTheme } from '../../store';
 
 interface SettingsPageProps {
   /** Callback for the back-navigation button in the header. */
@@ -28,7 +28,7 @@ export default function SettingsPage({
   onChangePassword,
   onLinkedAccounts,
 }: SettingsPageProps) {
-  const { theme } = useAppStore();
+  const theme = useTheme();
   const isDark = theme === 'dark';
   const { scale } = useDynamicFontSize();
 
