@@ -219,6 +219,16 @@ Run `eas credentials` to set up or repair iOS/Android signing credentials.
 - Dark/light mode
 - **Isolated Component Development** via Storybook
 
+## Adaptive Notification Throttling
+
+Notification delivery now adapts to recent engagement to reduce fatigue and battery usage:
+
+- **Active users** (engaged within 24 hours): ~5 minute minimum gap per notification type.
+- **Recently inactive users** (24-72 hours): ~30 minute minimum gap per notification type.
+- **Inactive users** (72+ hours or no engagement history): ~180 minute minimum gap per notification type.
+
+Engagement is currently recorded when users open notifications. Throttling is enforced per notification type before storing foreground notifications.
+
 ## Resources
 
 - [Figma Design](https://www.figma.com/design/0RX6a19AbtemWmq8GLX1Y4/TeachLink-Project?node-id=0-1&t=gfrhW9c55Pxnfrl1-0)
