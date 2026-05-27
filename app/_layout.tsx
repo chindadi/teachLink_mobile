@@ -1,15 +1,20 @@
-import { Stack, useRouter, usePathname, useSegments } from "expo-router";
-import React, { useCallback, useEffect } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
-import "../global.css"; // NativeWind CSS
-import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from "../src/components";
+import { Stack, useRouter, usePathname, useSegments } from 'expo-router';
+import React, { useCallback, useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import 'react-native-reanimated';
+import '../global.css'; // NativeWind CSS
+import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from '../src/components';
 import { useAnalytics } from '../src/hooks';
 import { useDeepLink } from '../src/hooks/useDeepLink';
 import { getPathFromDeepLink } from '../src/utils/linkParser';
+import { prefetchExternalResources } from '../src/utils/resourceHints';
+
+// Kick off resource hints as early as possible — fire-and-forget, never blocks startup.
+prefetchExternalResources();
 
 // Component to handle auto screen tracking
-function ScreenTracker() {
+const ScreenTracker = () => {
   const pathname = usePathname();
   const segments = useSegments();
   const { trackScreen } = useAnalytics();
@@ -22,17 +27,20 @@ function ScreenTracker() {
   }, [pathname, segments, trackScreen]);
 
   return null;
-}
+};
 
-export default function RootLayout() {
+const RootLayout = () => {
   const router = useRouter();
 
-  const handleDeepLink = useCallback((deepLink) => {
-    const path = getPathFromDeepLink(deepLink);
-    if (path) {
-      router.replace(path);
-    }
-  }, [router]);
+  const handleDeepLink = useCallback(
+    deepLink => {
+      const path = getPathFromDeepLink(deepLink);
+      if (path) {
+        router.replace(path);
+      }
+    },
+    [router]
+  );
 
   useDeepLink(handleDeepLink);
 
@@ -57,4 +65,6 @@ export default function RootLayout() {
       </AnalyticsProvider>
     </ErrorBoundary>
   );
-}
+};
+
+export default RootLayout;
