@@ -38,7 +38,8 @@
     "perf:bundle": "node scripts/checkBundleSize.js",
     "perf:api": "node scripts/checkApiPerf.js",
     "analyze:routes": "node scripts/analyzeRouteSizes.js",
-    "analyze:routes:report": "node scripts/analyzeRouteSizes.js --report"
+    "analyze:routes:report": "node scripts/analyzeRouteSizes.js --report",
+    "validate:openapi": "node scripts/validateOpenApi.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
