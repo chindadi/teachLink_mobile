@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
+import { decodeBinaryMessage, encodeBinaryMessage } from './binaryProtocol';
 import { getEnv } from '../../config';
 import { appLogger } from '../../utils/logger';
 
@@ -77,7 +78,11 @@ class SocketService {
 
       this.socket.on('notification_created', (notification: any) => {
         const start = performance.now();
-        const rawString = JSON.stringify(notification);
+        const parsed =
+          notification instanceof ArrayBuffer || notification instanceof Uint8Array
+            ? decodeBinaryMessage(notification).payload
+            : notification;
+        const rawString = JSON.stringify(parsed);
         const sizeBytes = rawString.length;
         appLogger.info(
           `[Socket In] Event: notification_created, size: ${(sizeBytes / 1024).toFixed(2)} KB`
@@ -94,7 +99,11 @@ class SocketService {
 
       this.socket.on('course_updated', (courseData: any) => {
         const start = performance.now();
-        const rawString = JSON.stringify(courseData);
+        const parsed =
+          courseData instanceof ArrayBuffer || courseData instanceof Uint8Array
+            ? decodeBinaryMessage(courseData).payload
+            : courseData;
+        const rawString = JSON.stringify(parsed);
         const sizeBytes = rawString.length;
         appLogger.info(
           `[Socket In] Event: course_updated, size: ${(sizeBytes / 1024).toFixed(2)} KB`
@@ -109,7 +118,11 @@ class SocketService {
 
       this.socket.on('message_received', (message: any) => {
         const start = performance.now();
-        const rawString = JSON.stringify(message);
+        const parsed =
+          message instanceof ArrayBuffer || message instanceof Uint8Array
+            ? decodeBinaryMessage(message).payload
+            : message;
+        const rawString = JSON.stringify(parsed);
         const sizeBytes = rawString.length;
         appLogger.info(
           `[Socket In] Event: message_received, size: ${(sizeBytes / 1024).toFixed(2)} KB`
@@ -133,14 +146,18 @@ class SocketService {
     }
   }
 
-  emit(event: string, data: any) {
+  emit(event: string, data: Record<string, any>) {
     if (this.socket) {
       const start = performance.now();
-      const payloadString = typeof data === 'string' ? data : JSON.stringify(data);
-      const sizeBytes = payloadString.length;
+      const encoded = encodeBinaryMessage(event, data);
+      const sizeBytes =
+        encoded instanceof ArrayBuffer || encoded instanceof Uint8Array
+          ? encoded.byteLength
+          : typeof encoded === 'string'
+            ? encoded.length
+            : JSON.stringify(encoded).length;
 
-      // Emit the event via Socket.IO
-      this.socket.emit(event, data);
+      this.socket.emit(event, encoded);
 
       const end = performance.now();
       appLogger.info(
@@ -153,10 +170,14 @@ class SocketService {
     if (this.socket) {
       this.socket.on(event, (data: any) => {
         const start = performance.now();
-        const rawString = JSON.stringify(data);
+        const parsed =
+          data instanceof ArrayBuffer || data instanceof Uint8Array
+            ? decodeBinaryMessage(data).payload
+            : data;
+        const rawString = JSON.stringify(parsed);
         const sizeBytes = rawString.length;
 
-        callback(data);
+        callback(parsed);
 
         const end = performance.now();
         appLogger.info(
