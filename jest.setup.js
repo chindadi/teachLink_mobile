@@ -12,8 +12,8 @@ jest.mock('react-native', () => ({
   TouchableOpacity: 'TouchableOpacity',
   Modal: 'Modal',
   SafeAreaView: 'SafeAreaView',
-  ScrollView: 'ScrollView',
   KeyboardAvoidingView: 'KeyboardAvoidingView',
+  ScrollView: 'ScrollView',
   Switch: 'Switch',
   TextInput: 'TextInput',
   ActivityIndicator: 'ActivityIndicator',
@@ -294,29 +294,7 @@ jest.mock('expo-linking', () => ({
   getInitialURL: jest.fn(() => Promise.resolve(null)),
 }));
 
-// Mock expo-notifications (override jest-expo's mock to add removed methods)
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'undetermined' })),
-  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  getExpoPushTokenAsync: jest.fn(() =>
-    Promise.resolve({ data: 'ExponentPushToken[test-token-123]' })
-  ),
-  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
-  scheduleNotificationAsync: jest.fn(() => Promise.resolve('notification-id')),
-  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
-  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
-  getBadgeCountAsync: jest.fn(() => Promise.resolve(0)),
-  setBadgeCountAsync: jest.fn(() => Promise.resolve()),
-  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  removeNotificationSubscription: jest.fn(), // deprecated but used in codebase
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  AndroidImportance: { HIGH: 4, DEFAULT: 3 },
-  PermissionStatus: { GRANTED: 'granted', DENIED: 'denied', UNDETERMINED: 'undetermined' },
-}));
-
-// Mock @sentry/react-native to prevent Jest environment failure
+// Mock @sentry/react-native globally to support offline/logger testing
 jest.mock('@sentry/react-native', () => ({
   init: jest.fn(),
   wrap: jest.fn(component => component),
@@ -325,6 +303,8 @@ jest.mock('@sentry/react-native', () => ({
   setUser: jest.fn(),
   clearBreadcrumbs: jest.fn(),
   addBreadcrumb: jest.fn(),
+  ReactNavigationInstrumentation: jest.fn(),
+  ReactNativeTracing: jest.fn(),
   Native: {
     RNSentry: {},
   },
@@ -410,5 +390,17 @@ jest.mock('react-native-gesture-handler', () => {
     GestureDetector: RN.View,
     Swipeable: RN.View,
     gestureHandlerRootHOC: jest.fn(c => c),
+  };
+});
+
+// Mock react-native-svg globally to resolve SvgTouchableMixin errors
+jest.mock('react-native-svg', () => {
+  const RN = require('react-native');
+  return {
+    default: RN.View,
+    Svg: RN.View,
+    Path: RN.View,
+    Rect: RN.View,
+    Circle: RN.View,
   };
 });
