@@ -34,6 +34,11 @@ export enum AnalyticsEvent {
   // Button Clicks
   BUTTON_CLICK = 'button_click',
 
+  // App Store Review
+  REVIEW_REQUESTED = 'review_requested',
+  REVIEW_PROMPT_SHOWN = 'review_prompt_shown',
+  REVIEW_PROMPT_DISMISSED = 'review_prompt_dismissed',
+
   // Performance & Infrastructure
   PERFORMANCE_METRIC = 'performance_metric',
   AB_ASSIGNMENT = 'ab_assignment',

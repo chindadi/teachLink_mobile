@@ -9,6 +9,7 @@ export * from './useDynamicFontSize';
 export * from './useGestures';
 export * from './useHapticFeedback';
 export * from './useInAppPurchase';
+export { useInAppReview, useReviewMetrics } from './useInAppReview';
 export * from './useLongPress';
 export * from './useMemoryMonitor';
 export * from './useNetworkStatus';
