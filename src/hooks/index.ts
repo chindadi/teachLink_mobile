@@ -1,4 +1,5 @@
 export * from './useFormCache';
+export * from './useAdaptiveFrameRate';
 export * from './useAdaptiveTheme';
 export * from './useAnalytics';
 export { AuthProvider, useAuth } from './useAuth';
@@ -23,4 +24,11 @@ export * from './useScreenReader';
 export * from './useSwipe';
 export * from './useVideoGestures';
 export * from './useVoiceRecognition';
+
+// Optimized gesture handlers with native-driven animations
+export * from './useOptimizedLongPress';
+export * from './useOptimizedPinchZoom';
+export * from './useOptimizedSwipe';
+export * from './useOptimizedVideoGestures';
+
 export * from './useDebounce';

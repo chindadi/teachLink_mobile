@@ -2,6 +2,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   BookOpen,
   Camera,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Edit3,
   Globe,
@@ -18,14 +20,23 @@ import {
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  LayoutAnimation,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  UIManager,
   View,
 } from 'react-native';
 import { useFormCache } from '../../hooks/useFormCache';
 import { PROFILE_FORM_CACHE_KEYS } from '../../services/formCache';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { Achievement, AchievementBadges } from './AchievementBadges';
 import { AvatarCamera } from './AvatarCamera';
 import { MobileFormInput } from './MobileFormInput';
@@ -333,6 +344,8 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
       </SafeAreaView>
     );
   }
+  // Progressive disclosure: advanced profile fields collapsed by default
+  const [showAdvancedFields, setShowAdvancedFields] = useState(false);
 
   // Theme tokens
   const bg = isDark ? '#0f172a' : '#f8fafc';
@@ -372,7 +385,13 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
       }
     );
     setFormErrors({});
+    setShowAdvancedFields(false); // reset disclosure state on each edit session
     setIsEditing(true);
+  };
+
+  const handleToggleAdvancedFields = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowAdvancedFields(prev => !prev);
   };
 
   const validateForm = (): Record<string, string> => {
@@ -653,13 +672,15 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
               {isEditing ? (
                 <>
                   <Text style={[styles.cardTitle, { color: textPrimary }]}>Edit Profile</Text>
+
+                  {/* ── Basic Fields (always visible) ── */}
                   <MobileFormInput
                     label="Full Name"
                     value={editName}
                     onChangeText={setEditName}
                     placeholder="Your full name"
                     required
-                    error={formErrors.name}
+                    error={formErrors?.name}
                     isDark={isDark}
                     cacheKey="fullName"
                     leftIcon={<User size={18} color="#94a3b8" />}
@@ -672,7 +693,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                     keyboardType="email-address"
                     autoCapitalize="none"
                     required
-                    error={formErrors.email}
+                    error={formErrors?.email}
                     isDark={isDark}
                     cacheKey="email"
                     leftIcon={<Mail size={18} color="#94a3b8" />}
@@ -686,26 +707,52 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                     isDark={isDark}
                     cacheKey="bio"
                   />
-                  <MobileFormInput
-                    label="Location"
-                    value={editLocation}
-                    onChangeText={setEditLocation}
-                    placeholder="City, Country"
-                    isDark={isDark}
-                    cacheKey="location"
-                    leftIcon={<MapPin size={18} color="#94a3b8" />}
-                  />
-                  <MobileFormInput
-                    label="Website"
-                    value={editWebsite}
-                    onChangeText={setEditWebsite}
-                    placeholder="yourwebsite.com"
-                    keyboardType="url"
-                    autoCapitalize="none"
-                    isDark={isDark}
-                    cacheKey="website"
-                    leftIcon={<Globe size={18} color="#94a3b8" />}
-                  />
+
+                  {/* ── Progressive Disclosure: Advanced Details ── */}
+                  <TouchableOpacity
+                    style={[
+                      styles.disclosureToggle,
+                      { borderColor: isDark ? '#334155' : '#e2e8f0' },
+                    ]}
+                    onPress={handleToggleAdvancedFields}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={showAdvancedFields ? 'Hide advanced details' : 'Show advanced details'}
+                    accessibilityState={{ expanded: showAdvancedFields }}
+                  >
+                    <Text style={[styles.disclosureToggleText, { color: '#19c3e6' }]}>
+                      {showAdvancedFields ? 'Hide Advanced Details' : 'Advanced Details'}
+                    </Text>
+                    {showAdvancedFields
+                      ? <ChevronUp size={16} color="#19c3e6" />
+                      : <ChevronDown size={16} color="#19c3e6" />}
+                  </TouchableOpacity>
+
+                  {/* ── Advanced Fields (expandable) ── */}
+                  {showAdvancedFields && (
+                    <View style={styles.disclosureContent}>
+                      <MobileFormInput
+                        label="Location"
+                        value={editLocation}
+                        onChangeText={setEditLocation}
+                        placeholder="City, Country"
+                        isDark={isDark}
+                        cacheKey="location"
+                        leftIcon={<MapPin size={18} color="#94a3b8" />}
+                      />
+                      <MobileFormInput
+                        label="Website"
+                        value={editWebsite}
+                        onChangeText={setEditWebsite}
+                        placeholder="yourwebsite.com"
+                        keyboardType="url"
+                        autoCapitalize="none"
+                        isDark={isDark}
+                        cacheKey="website"
+                        leftIcon={<Globe size={18} color="#94a3b8" />}
+                      />
+                    </View>
+                  )}
                 </>
               ) : (
                 <>
@@ -1185,5 +1232,25 @@ const styles = StyleSheet.create({
   followBtnText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  // Progressive disclosure
+  disclosureToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginTop: 4,
+    marginBottom: 2,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+  },
+  disclosureToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  disclosureContent: {
+    marginTop: 4,
+    gap: 0,
   },
 });
