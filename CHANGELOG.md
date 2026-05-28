@@ -1,4 +1,11 @@
-# 1.1.0 (2026-05-28)
+# [1.2.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.1.0...v1.2.0) (2026-05-28)
+
+
+### Features
+
+* add preconnect and dns-prefetch resource hints ([#409](https://github.com/rinafcode/teachLink_mobile/issues/409)) ([66fd12d](https://github.com/rinafcode/teachLink_mobile/commit/66fd12dba21b760f457f5b987e28ce5614e64fe8))
+
+# [1.1.0](https://github.com/rinafcode/teachLink_mobile/compare/c22dc6127c209374a29384ea8d37acc9e4443824...v1.1.0) (2026-05-28)
 
 
 ### Bug Fixes
