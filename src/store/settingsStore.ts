@@ -1,6 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ProfileVisibility = 'public' | 'private' | 'friends_only';
 export type DownloadQuality = 'low' | 'medium' | 'high';
@@ -57,23 +57,6 @@ interface SettingsState {
   resetSettings: () => void;
 }
 
-const DEFAULT_SETTINGS: Omit<SettingsState, keyof Omit<SettingsState, ProfileVisibility | DownloadQuality | StorageLimit | AppLanguage | FontSize | boolean>> = {
-  profileVisibility: 'public' as ProfileVisibility,
-  twoFactorEnabled: false,
-  dataSharing: true,
-  analyticsEnabled: true,
-  locationServices: false,
-  downloadOverWifiOnly: true,
-  autoDownload: false,
-  downloadQuality: 'medium' as DownloadQuality,
-  storageLimit: '2GB' as StorageLimit,
-  language: 'english' as AppLanguage,
-  fontSize: 'medium' as FontSize,
-  autoplay: true,
-  hapticFeedback: true,
-  adaptiveThemeEnabled: false,
-};
-
 const INITIAL_STATE = {
   profileVisibility: 'public' as ProfileVisibility,
   twoFactorEnabled: false,
@@ -93,30 +76,30 @@ const INITIAL_STATE = {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    set => ({
       ...INITIAL_STATE,
 
       // Account
-      setProfileVisibility: (v) => set({ profileVisibility: v }),
-      setTwoFactorEnabled: (v) => set({ twoFactorEnabled: v }),
+      setProfileVisibility: v => set({ profileVisibility: v }),
+      setTwoFactorEnabled: v => set({ twoFactorEnabled: v }),
 
       // Privacy
-      setDataSharing: (v) => set({ dataSharing: v }),
-      setAnalyticsEnabled: (v) => set({ analyticsEnabled: v }),
-      setLocationServices: (v) => set({ locationServices: v }),
+      setDataSharing: v => set({ dataSharing: v }),
+      setAnalyticsEnabled: v => set({ analyticsEnabled: v }),
+      setLocationServices: v => set({ locationServices: v }),
 
       // Downloads
-      setDownloadOverWifiOnly: (v) => set({ downloadOverWifiOnly: v }),
-      setAutoDownload: (v) => set({ autoDownload: v }),
-      setDownloadQuality: (v) => set({ downloadQuality: v }),
-      setStorageLimit: (v) => set({ storageLimit: v }),
+      setDownloadOverWifiOnly: v => set({ downloadOverWifiOnly: v }),
+      setAutoDownload: v => set({ autoDownload: v }),
+      setDownloadQuality: v => set({ downloadQuality: v }),
+      setStorageLimit: v => set({ storageLimit: v }),
 
       // App Preferences
-      setLanguage: (v) => set({ language: v }),
-      setFontSize: (v) => set({ fontSize: v }),
-      setAutoplay: (v) => set({ autoplay: v }),
-      setHapticFeedback: (v) => set({ hapticFeedback: v }),
-      setAdaptiveThemeEnabled: (v) => set({ adaptiveThemeEnabled: v }),
+      setLanguage: v => set({ language: v }),
+      setFontSize: v => set({ fontSize: v }),
+      setAutoplay: v => set({ autoplay: v }),
+      setHapticFeedback: v => set({ hapticFeedback: v }),
+      setAdaptiveThemeEnabled: v => set({ adaptiveThemeEnabled: v }),
 
       resetSettings: () => set(INITIAL_STATE),
     }),

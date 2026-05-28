@@ -53,7 +53,7 @@ const secureStorageAdapter: StateStorage = {
 export const useAppStore = create<AppState>()(
   devtools(
     persist(
-      subscribeWithSelector((set) => ({
+      subscribeWithSelector(set => ({
         user: null,
         isAuthenticated: false,
         isAuthLoading: false,
@@ -64,13 +64,13 @@ export const useAppStore = create<AppState>()(
         sessionExpiringSoon: false,
         isLoading: false,
         error: null,
-        setUser: (user) => set({ user, isAuthenticated: !!user }, false, 'setUser'),
+        setUser: user => set({ user, isAuthenticated: !!user }, false, 'setUser'),
         setTokens: (accessToken, refreshToken, sessionExpiresAt) =>
           set({ accessToken, refreshToken, sessionExpiresAt }, false, 'setTokens'),
-        setSessionExpiringSoon: (sessionExpiringSoon) =>
+        setSessionExpiringSoon: sessionExpiringSoon =>
           set({ sessionExpiringSoon }, false, 'setSessionExpiringSoon'),
-        setAuthLoading: (isAuthLoading) => set({ isAuthLoading }, false, 'setAuthLoading'),
-        setAuthError: (authError) => set({ authError }, false, 'setAuthError'),
+        setAuthLoading: isAuthLoading => set({ isAuthLoading }, false, 'setAuthLoading'),
+        setAuthError: authError => set({ authError }, false, 'setAuthError'),
         logout: () =>
           set(
             {
@@ -86,8 +86,8 @@ export const useAppStore = create<AppState>()(
             false,
             'logout'
           ),
-        setLoading: (isLoading) => set({ isLoading }, false, 'setLoading'),
-        setError: (error) => set({ error }, false, 'setError'),
+        setLoading: isLoading => set({ isLoading }, false, 'setLoading'),
+        setError: error => set({ error }, false, 'setError'),
       })),
       {
         name: 'app-auth-storage',
@@ -97,7 +97,7 @@ export const useAppStore = create<AppState>()(
          * Transient flags (isLoading, isAuthLoading, error, authError)
          * are intentionally excluded — they should always start fresh.
          */
-        partialize: (state) => ({
+        partialize: state => ({
           user: state.user,
           isAuthenticated: state.isAuthenticated,
           accessToken: state.accessToken,
@@ -109,7 +109,3 @@ export const useAppStore = create<AppState>()(
     { name: 'AppStore' }
   )
 );
-
-export * from './notificationStore';
-export * from './courseProgressStore';
-export * from './uiStore';
