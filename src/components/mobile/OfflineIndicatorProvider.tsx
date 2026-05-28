@@ -1,8 +1,10 @@
 import React from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useNetworkStatus } from '../../hooks';
-import logger from '../../utils/logger';
+
 import { OfflineIndicator } from './OfflineIndicator';
+import { useNetworkStatus } from '../../hooks';
+// eslint-disable-next-line import/no-named-as-default
+import logger from '../../utils/logger';
 
 interface Toast {
   id: string;
@@ -17,6 +19,20 @@ interface Toast {
  */
 export const OfflineIndicatorProvider = (props: any) => {
   const { children, showToastNotifications = true, toastDuration = 3000 } = props;
+
+  return React.createElement(
+    View,
+    { style: styles.container },
+    children,
+    React.createElement(OfflineUI, { showToastNotifications, toastDuration })
+  );
+};
+
+/**
+ * Isolated stateful component for network status banner and toast notifications
+ */
+const OfflineUI = React.memo((props: any) => {
+  const { showToastNotifications, toastDuration } = props;
   const { isOnline, isOffline } = useNetworkStatus();
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const [wasOffline, setWasOffline] = React.useState(isOffline);
@@ -60,16 +76,14 @@ export const OfflineIndicatorProvider = (props: any) => {
       }
       setWasOffline(isOffline);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOffline, isOnline, showToastNotifications, wasOffline]);
 
   return React.createElement(
-    View,
-    { style: styles.container },
+    React.Fragment,
+    null,
     // Offline Indicator Banner
     React.createElement(OfflineIndicator, { position: 'top' }),
-
-    // Main Content
-    children,
 
     // Toast Notifications Container
     React.createElement(
@@ -84,7 +98,9 @@ export const OfflineIndicatorProvider = (props: any) => {
       )
     )
   );
-};
+});
+
+OfflineUI.displayName = 'OfflineUI';
 
 /**
  * Individual Toast Component
