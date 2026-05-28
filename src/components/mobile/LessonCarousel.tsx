@@ -9,8 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAnalytics } from '../../hooks/useAnalytics';
 import { Lesson, CourseProgress } from '../../types/course';
+import { AnalyticsEvent } from '../../utils/trackingEvents';
+import { useDebounceCallback } from '../../hooks';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -45,8 +48,9 @@ const LessonCarousel = ({
   renderLessonContent,
   onLastLessonNext,
   isLastLessonInSection = false,
-}: LessonCarouselProps): React.JSX.Element => {
-  const flatListRef = useRef<FlatList<Lesson>>(null);
+}: LessonCarouselProps) {
+  const { trackEvent } = useAnalytics();
+  const scrollViewRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const progressBarWidth = useRef(new Animated.Value(0)).current;
 
@@ -80,7 +84,36 @@ const LessonCarousel = ({
   }, [progress, lessons, progressBarWidth]);
 
   const scrollToIndex = (index: number, animated = true) => {
-    flatListRef.current?.scrollToIndex({ index, animated });
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        x: index * SCREEN_WIDTH,
+        animated,
+      });
+    }
+  };
+
+  const debouncedScroll = useDebounceCallback((offsetX: number) => {
+    const index = Math.round(offsetX / SCREEN_WIDTH);
+    if (index >= 0 && index < lessons.length) {
+      setCurrentIndex((prevIndex) => {
+        if (index !== prevIndex) {
+          const lesson = lessons[index];
+          onLessonChange(lesson.id, index);
+          return index;
+        }
+        return prevIndex;
+      });
+    }
+  }, 100);
+
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    trackEvent(AnalyticsEvent.PERFORMANCE_METRIC, {
+      event_category: 'high_frequency',
+      event_name: 'lesson_carousel_scroll',
+      offsetX: Math.round(offsetX),
+    });
+    debouncedScroll(offsetX);
   };
 
   const handleMomentumScrollEnd = (event: any) => {
