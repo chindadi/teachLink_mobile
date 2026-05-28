@@ -14,6 +14,7 @@ jest.mock('react-native', () => ({
   SafeAreaView: 'SafeAreaView',
   KeyboardAvoidingView: 'KeyboardAvoidingView',
   ScrollView: 'ScrollView',
+  KeyboardAvoidingView: 'KeyboardAvoidingView',
   Switch: 'Switch',
   TextInput: 'TextInput',
   ActivityIndicator: 'ActivityIndicator',
@@ -224,13 +225,29 @@ jest.mock('expo-image', () => ({
   clearDiskCache: jest.fn(() => Promise.resolve()),
 }));
 
-// Mock react-native-safe-area-context
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaProvider: ({ children }) => children,
-  SafeAreaConsumer: ({ children }) => children({ top: 0, right: 0, bottom: 0, left: 0 }),
-  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
-  useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
-}));
+jest.mock('react-native-safe-area-context', () => {
+  const mockComponent = name => {
+    const Comp = ({ children }) => children;
+    Comp.displayName = name;
+    return Comp;
+  };
+  return new Proxy(
+    {
+      SafeAreaProvider: mockComponent('SafeAreaProvider'),
+      SafeAreaConsumer: ({ children }) => children({ top: 0, right: 0, bottom: 0, left: 0 }),
+      useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+      useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
+      SafeAreaView: mockComponent('SafeAreaView'),
+    },
+    {
+      get: (target, prop) => {
+        if (prop in target) return target[prop];
+        if (typeof prop === 'symbol') return undefined;
+        return mockComponent(String(prop));
+      },
+    }
+  );
+});
 
 // Mock expo-notifications (override jest-expo's mock to add removed methods)
 jest.mock('expo-notifications', () => ({
@@ -278,35 +295,24 @@ jest.mock('expo-linking', () => ({
   getInitialURL: jest.fn(() => Promise.resolve(null)),
 }));
 
-// Mock expo-notifications (override jest-expo's mock to add removed methods)
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'undetermined' })),
-  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  getExpoPushTokenAsync: jest.fn(() =>
-    Promise.resolve({ data: 'ExponentPushToken[test-token-123]' })
-  ),
-  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
-  scheduleNotificationAsync: jest.fn(() => Promise.resolve('notification-id')),
-  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
-  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
-  getBadgeCountAsync: jest.fn(() => Promise.resolve(0)),
-  setBadgeCountAsync: jest.fn(() => Promise.resolve()),
-  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  removeNotificationSubscription: jest.fn(), // deprecated but used in codebase
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  AndroidImportance: { HIGH: 4, DEFAULT: 3 },
-  PermissionStatus: { GRANTED: 'granted', DENIED: 'denied', UNDETERMINED: 'undetermined' },
-}));
+
 
 // Mock @sentry/react-native globally to support offline/logger testing
 jest.mock('@sentry/react-native', () => ({
   init: jest.fn(),
+  wrap: jest.fn(component => component),
   captureException: jest.fn(),
   captureMessage: jest.fn(),
+  setUser: jest.fn(),
+  clearBreadcrumbs: jest.fn(),
+  addBreadcrumb: jest.fn(),
   ReactNavigationInstrumentation: jest.fn(),
   ReactNativeTracing: jest.fn(),
+  Native: {
+    RNSentry: {},
+  },
+  SDK_NAME: 'sentry.javascript.react-native',
+  SDK_VERSION: '5.36.0',
 }));
 
 // Mock react-native-safe-area-context to prevent css-interop Safe Area Provider errors in tests
