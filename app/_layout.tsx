@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import '../global.css'; // NativeWind CSS
+import { MemoryProfilerOverlay } from '../components/DevTools';
 import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from '../src/components';
 import { useAnalytics } from '../src/hooks';
 import { useDeepLink } from '../src/hooks/useDeepLink';
@@ -130,6 +131,8 @@ const RootLayout = () => {
               <Stack.Screen name="quiz" options={{ headerShown: false }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             </Stack>
+            {/* DEV-only memory profiler overlay; renders null in production. */}
+            <MemoryProfilerOverlay />
           </GestureHandlerRootView>
         </OfflineIndicatorProvider>
       </AnalyticsProvider>
