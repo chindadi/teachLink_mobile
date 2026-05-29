@@ -31,3 +31,4 @@ export * from './useOptimizedSwipe';
 export * from './useOptimizedVideoGestures';
 
 export * from './useDebounce';
+export * from './usePredictivePreload';
