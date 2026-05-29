@@ -67,7 +67,8 @@ const App = () => {
       try {
         // 1. Load fonts
         await Font.loadAsync({
-          // You can add custom fonts here later if needed
+          'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+          'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
         });
 
         // 2. Version-based cache invalidation: clear stale caches on app/data version bump
