@@ -1,8 +1,5 @@
 import { useNotificationStore } from '../../store/notificationStore';
-import {
-  NotificationType,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-} from '../../types/notifications';
+import { NotificationType, DEFAULT_NOTIFICATION_PREFERENCES } from '../../types/notifications';
 
 // Helper to get fresh store state
 const getStore = () => useNotificationStore.getState();
@@ -19,6 +16,8 @@ describe('notificationStore', () => {
       preferences: DEFAULT_NOTIFICATION_PREFERENCES,
       notifications: [],
       unreadCount: 0,
+      lastEngagedAt: null,
+      lastNotificationSentAtByType: {},
     });
   });
 
@@ -107,6 +106,32 @@ describe('notificationStore', () => {
   });
 
   describe('Notification Storage', () => {
+    it('should record engagement and use shortest throttle window for active users', () => {
+      getStore().recordEngagement();
+      const now = new Date();
+
+      expect(getStore().getNotificationThrottleMinutes(now)).toBe(5);
+    });
+
+    it('should throttle frequent notifications when user is inactive', () => {
+      const now = new Date('2026-05-27T12:00:00.000Z');
+
+      expect(getStore().getNotificationThrottleMinutes(now)).toBe(180);
+      expect(getStore().shouldThrottleNotification(NotificationType.MESSAGE, now)).toBe(false);
+      expect(
+        getStore().shouldThrottleNotification(
+          NotificationType.MESSAGE,
+          new Date('2026-05-27T13:00:00.000Z')
+        )
+      ).toBe(true);
+      expect(
+        getStore().shouldThrottleNotification(
+          NotificationType.MESSAGE,
+          new Date('2026-05-27T15:05:00.000Z')
+        )
+      ).toBe(false);
+    });
+
     it('should add notification', () => {
       getStore().addNotification({
         type: NotificationType.COURSE_UPDATE,
@@ -151,7 +176,7 @@ describe('notificationStore', () => {
       getStore().markAllAsRead();
 
       expect(getStore().unreadCount).toBe(0);
-      expect(getStore().notifications.every((n) => n.read)).toBe(true);
+      expect(getStore().notifications.every(n => n.read)).toBe(true);
     });
 
     it('should remove notification', () => {

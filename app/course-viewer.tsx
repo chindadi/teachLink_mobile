@@ -1,24 +1,30 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { lazy, Suspense } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 
-const MobileCourseViewer = lazy(() => import('@/src/components/mobile/MobileCourseViewer'));
+import { CourseViewerSkeleton } from '@/components/mobile/CourseViewerSkeleton';
+import { sampleCourse } from '@/data/sampleCourse';
+import { createLazyRoute } from '@/utils/lazyRoute';
 
-export default function CourseViewerScreen() {
+const LazyMobileCourseViewer = createLazyRoute({
+  importFn: () => import('@/components/mobile/MobileCourseViewer'),
+  LoadingFallback: CourseViewerSkeleton,
+  boundaryName: 'CourseViewerRoute',
+});
+
+const CourseViewerScreen = () => {
   const router = useRouter();
-  const { course, initialLessonId, initialViewMode } = useLocalSearchParams();
+  const { course, courseId, initialLessonId, initialViewMode } = useLocalSearchParams();
 
-  const parsedCourse = course ? JSON.parse(course as string) : null;
+  const parsedCourse = course ? JSON.parse(course as string) : courseId ? sampleCourse : null;
   const viewMode = initialViewMode as 'lesson' | 'syllabus' | 'notes' | undefined;
 
   return (
-    <Suspense fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>}>
-      <MobileCourseViewer
-        course={parsedCourse}
-        initialLessonId={initialLessonId as string}
-        initialViewMode={viewMode}
-        onBack={() => router.back()}
-      />
-    </Suspense>
+    <LazyMobileCourseViewer
+      course={parsedCourse}
+      initialLessonId={initialLessonId as string}
+      initialViewMode={viewMode}
+      onBack={() => router.back()}
+    />
   );
-}
+};
+
+export default CourseViewerScreen;

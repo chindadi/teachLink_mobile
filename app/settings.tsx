@@ -1,21 +1,32 @@
-import { useAppStore } from '@/src/store';
-import React, { lazy, Suspense } from 'react';
-import { ActivityIndicator, Switch, View } from 'react-native';
-import { AppText } from '@/src/components/common/AppText';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const MobileSettings = lazy(() => import('@/src/components/mobile/MobileSettings'));
+import { SettingsSkeleton } from '@/components/mobile/SettingsSkeleton';
+import { mobileAuthService } from '@/services/mobileAuth';
+import { useAppStore } from '@/store';
+import { createLazyRoute } from '@/utils/lazyRoute';
 
-export default function SettingsScreen() {
-  const { theme, setTheme } = useAppStore();
-  const isDark = theme === 'dark';
+const LazyMobileSettings = createLazyRoute({
+  importFn: () => import('@/components/mobile/MobileSettings'),
+  LoadingFallback: SettingsSkeleton,
+  boundaryName: 'SettingsRoute',
+});
+
+const SettingsScreen = () => {
+  const router = useRouter();
+  const { logout } = useAppStore();
+
+  const handleSignOut = async () => {
+    await mobileAuthService.logout();
+    logout();
+    router.replace('/');
+  };
 
   return (
-    <Suspense fallback={
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    }>
-      <MobileSettings />
-    </Suspense>
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <LazyMobileSettings onSignOut={handleSignOut} />
+    </SafeAreaView>
   );
-}
+};
+
+export default SettingsScreen;

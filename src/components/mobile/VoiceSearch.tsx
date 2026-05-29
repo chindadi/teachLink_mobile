@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Mic, Square } from 'lucide-react-native';
-import { useVoiceRecognition } from '../../hooks/useVoiceRecognition';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import * as hooks from '../../hooks';
 
 export interface VoiceSearchProps {
   onTranscript: (text: string) => void;
@@ -11,12 +12,25 @@ export interface VoiceSearchProps {
   compact?: boolean;
 }
 
-export function VoiceSearch({
+export const VoiceSearch = ({
   onTranscript,
   onTranscriptFinal,
   disabled = false,
   compact = false,
-}: VoiceSearchProps) {
+}: VoiceSearchProps) => {
+  const useVoiceRecognition =
+    typeof hooks.useVoiceRecognition === 'function'
+      ? hooks.useVoiceRecognition
+      : () => ({
+          isListening: false,
+          transcript: '',
+          isAvailable: false,
+          error: null as string | null,
+          startListening: () => undefined,
+          stopListening: () => undefined,
+          resetTranscript: () => undefined,
+        });
+
   const {
     isListening,
     transcript,
@@ -64,9 +78,11 @@ export function VoiceSearch({
         accessibilityLabel={isListening ? 'Stop voice search' : 'Start voice search'}
         activeOpacity={0.8}
       >
-        {isListening
-          ? <Square size={18} color="#19c3e6" fill="#19c3e6" />
-          : <Mic size={20} color="#9CA3AF" />}
+        {isListening ? (
+          <Square size={18} color="#19c3e6" fill="#19c3e6" />
+        ) : (
+          <Mic size={20} color="#9CA3AF" />
+        )}
       </TouchableOpacity>
     );
   }
@@ -81,7 +97,11 @@ export function VoiceSearch({
       <TouchableOpacity
         onPress={handlePress}
         disabled={disabled}
-        style={[styles.button, isListening && styles.buttonActive, disabled && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          isListening && styles.buttonActive,
+          disabled && styles.buttonDisabled,
+        ]}
         activeOpacity={0.8}
       >
         {isListening ? (
@@ -92,9 +112,7 @@ export function VoiceSearch({
         ) : (
           <>
             <Mic size={22} color={isAvailable ? '#19c3e6' : '#9CA3AF'} />
-            <Text style={[styles.buttonLabel, !isAvailable && styles.buttonLabelMuted]}>
-              Voice
-            </Text>
+            <Text style={[styles.buttonLabel, !isAvailable && styles.buttonLabelMuted]}>Voice</Text>
           </>
         )}
       </TouchableOpacity>
@@ -108,7 +126,7 @@ export function VoiceSearch({
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   wrapper: {

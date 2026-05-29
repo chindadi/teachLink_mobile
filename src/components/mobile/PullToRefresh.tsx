@@ -10,6 +10,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { useAdaptiveFrameRate } from '../../hooks/useAdaptiveFrameRate';
 
 type AnyScrollComponent = React.ComponentType<any>;
 
@@ -84,12 +85,14 @@ export function PullToRefresh(props: PullToRefreshProps) {
 
   const [screenReaderEnabled, setScreenReaderEnabled] = React.useState(false);
 
+  const { durationMultiplier } = useAdaptiveFrameRate();
+
   React.useEffect(() => {
     let mounted = true;
-    AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+    AccessibilityInfo.isScreenReaderEnabled().then(enabled => {
       if (mounted) setScreenReaderEnabled(enabled);
     });
-    const sub = AccessibilityInfo.addEventListener?.('screenReaderChanged', (enabled) => {
+    const sub = AccessibilityInfo.addEventListener?.('screenReaderChanged', enabled => {
       setScreenReaderEnabled(Boolean(enabled));
     });
     return () => {
@@ -104,12 +107,12 @@ export function PullToRefresh(props: PullToRefreshProps) {
     (toValue: number) => {
       Animated.timing(pullY, {
         toValue,
-        duration: 180,
+        duration: 180 * durationMultiplier,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
     },
-    [pullY],
+    [pullY, durationMultiplier]
   );
 
   const runRefresh = React.useCallback(async () => {
@@ -130,12 +133,15 @@ export function PullToRefresh(props: PullToRefreshProps) {
     else animatePullTo(0);
   }, [animatePullTo, maxPull, refreshing, threshold]);
 
-  const onScroll = React.useCallback((e: any) => {
-    scrollYRef.current = e?.nativeEvent?.contentOffset?.y ?? 0;
-    // Forward if consumer provided their own onScroll.
-    const consumerOnScroll = (scrollProps as any)?.onScroll;
-    consumerOnScroll?.(e);
-  }, [scrollProps]);
+  const onScroll = React.useCallback(
+    (e: any) => {
+      scrollYRef.current = e?.nativeEvent?.contentOffset?.y ?? 0;
+      // Forward if consumer provided their own onScroll.
+      const consumerOnScroll = (scrollProps as any)?.onScroll;
+      consumerOnScroll?.(e);
+    },
+    [scrollProps]
+  );
 
   const canStartPull = () => !refreshing && scrollYRef.current <= 0;
 
@@ -195,7 +201,7 @@ export function PullToRefresh(props: PullToRefreshProps) {
       },
       onResponderTerminationRequest: () => true,
     }),
-    [animatePullTo, maxPull, pullY, refreshing, runRefresh, threshold],
+    [animatePullTo, maxPull, pullY, refreshing, runRefresh, threshold]
   );
 
   const progress = pullY.interpolate({
@@ -284,4 +290,3 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
 });
-
