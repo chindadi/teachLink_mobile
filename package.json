@@ -22,7 +22,9 @@
     "deploy:ios": "bash ./scripts/deploy-ios.sh",
     "deploy:both": "bash ./scripts/deploy-both.sh",
     "deploy:preview": "bash ./scripts/deploy-preview.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "fonts:subset": "node ./scripts/subset-fonts.js",
+    "fonts:analyze": "node ./scripts/analyze-fonts.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
