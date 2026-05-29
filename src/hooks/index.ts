@@ -25,10 +25,10 @@ export * from './useSwipe';
 export * from './useVideoGestures';
 export * from './useVoiceRecognition';
 
-// Optimized gesture handlers with native-driven animations
-export * from './useOptimizedLongPress';
-export * from './useOptimizedPinchZoom';
-export * from './useOptimizedSwipe';
-export * from './useOptimizedVideoGestures';
+// Optimized gesture handlers (named exports avoid duplicate SwipeDirection/SwipeInfo types)
+export { useOptimizedLongPress, OptimizedLongPressView } from './useOptimizedLongPress';
+export { useOptimizedPinchZoom, OptimizedPinchZoomView } from './useOptimizedPinchZoom';
+export { useOptimizedSwipe, OptimizedSwipeView } from './useOptimizedSwipe';
+export { useOptimizedVideoGestures, OptimizedVideoGesturesView } from './useOptimizedVideoGestures';
 
 export * from './useDebounce';

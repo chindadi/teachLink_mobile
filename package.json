@@ -40,6 +40,7 @@
     "perf:analyze": "tsx src/audit/cli.ts --format html --output ./reports/performance-analysis",
     "perf:bundle": "node scripts/checkBundleSize.js",
     "perf:api": "node scripts/checkApiPerf.js",
+    "measure:bundle": "bash scripts/measureRouteBundle.sh",
     "analyze:routes": "node scripts/analyzeRouteSizes.js",
     "analyze:routes:report": "node scripts/analyzeRouteSizes.js --report",
     "validate:openapi": "node scripts/validateOpenApi.js"
