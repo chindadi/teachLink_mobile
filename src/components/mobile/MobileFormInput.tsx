@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react-native';
-import {
-  View,
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, TextInputProps, TouchableOpacity, StyleSheet } from 'react-native';
+
 import { useDynamicFontSize } from '../../hooks';
 import {
   formCacheService,
@@ -39,6 +34,8 @@ interface MobileFormInputProps extends TextInputProps {
   cacheKey?: FormCacheFieldKey;
   /** Persist value to cache on blur (default: true when cacheKey is set) */
   cacheOnBlur?: boolean;
+  /** Optional ref for focusing the underlying input from parent screens */
+  inputRef?: React.Ref<TextInput>;
 }
 
 export const MobileFormInput: React.FC<MobileFormInputProps> = ({
@@ -53,6 +50,7 @@ export const MobileFormInput: React.FC<MobileFormInputProps> = ({
   isDark = false,
   cacheKey,
   cacheOnBlur = true,
+  inputRef,
   secureTextEntry,
   multiline = false,
   keyboardType = 'default',
@@ -145,6 +143,7 @@ export const MobileFormInput: React.FC<MobileFormInputProps> = ({
           placeholderTextColor={isDark ? '#475569' : '#94a3b8'}
           value={value}
           onChangeText={onChangeText}
+          ref={inputRef}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
           secureTextEntry={isPassword && !showPassword}
@@ -168,17 +167,28 @@ export const MobileFormInput: React.FC<MobileFormInputProps> = ({
         <TouchableOpacity
           style={[
             styles.suggestionRow,
-            { backgroundColor: isDark ? '#0f172a' : '#f0f9ff', borderColor: isDark ? '#334155' : '#bae6fd' },
+            {
+              backgroundColor: isDark ? '#0f172a' : '#f0f9ff',
+              borderColor: isDark ? '#334155' : '#bae6fd',
+            },
           ]}
           onPress={handleApplySuggestion}
           accessibilityRole="button"
           accessibilityLabel={`Use cached value ${suggestion}`}
         >
-          <Text style={[styles.suggestionLabel, { color: isDark ? '#94a3b8' : '#64748b', fontSize: scale(12) }]}>
+          <Text
+            style={[
+              styles.suggestionLabel,
+              { color: isDark ? '#94a3b8' : '#64748b', fontSize: scale(12) },
+            ]}
+          >
             Use saved:
           </Text>
           <Text
-            style={[styles.suggestionValue, { color: isDark ? '#38bdf8' : '#0284c7', fontSize: scale(12) }]}
+            style={[
+              styles.suggestionValue,
+              { color: isDark ? '#38bdf8' : '#0284c7', fontSize: scale(12) },
+            ]}
             numberOfLines={1}
           >
             {suggestion}

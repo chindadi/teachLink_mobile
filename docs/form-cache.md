@@ -13,17 +13,17 @@ Client-side caching for reusable form fields (name, email, address, preferences)
 
 ## Cached field keys
 
-| Key | Typical use |
-|-----|-------------|
-| `fullName` | Profile, registration |
-| `email` | Profile, registration |
-| `bio` | Profile |
-| `location` | Profile, address forms |
-| `website` | Profile |
-| `phone` | Contact forms |
-| `addressLine1` / `addressLine2` | Shipping, billing |
-| `city` / `state` / `postalCode` / `country` | Address blocks |
-| `company` | Organization fields |
+| Key                                         | Typical use            |
+| ------------------------------------------- | ---------------------- |
+| `fullName`                                  | Profile, registration  |
+| `email`                                     | Profile, registration  |
+| `bio`                                       | Profile                |
+| `location`                                  | Profile, address forms |
+| `website`                                   | Profile                |
+| `phone`                                     | Contact forms          |
+| `addressLine1` / `addressLine2`             | Shipping, billing      |
+| `city` / `state` / `postalCode` / `country` | Address blocks         |
+| `company`                                   | Organization fields    |
 
 ## Lifecycle
 
@@ -34,14 +34,15 @@ Client-side caching for reusable form fields (name, email, address, preferences)
 
 ## Implementation map
 
-| Module | Role |
-|--------|------|
-| `src/services/formCache.ts` | Storage, TTL, suggestions |
-| `src/hooks/useFormCache.ts` | React hook for multi-field forms |
-| `src/components/mobile/MobileFormInput.tsx` | Per-field cache + suggestion UI |
-| `src/components/mobile/MobileProfile.tsx` | Profile edit prefill + persist |
-| `src/pages/mobile/MobileRegister.tsx` | Registration prefill + persist |
-| `src/components/mobile/MobileSettings.tsx` | Clear cache control |
+| Module                                      | Role                                 |
+| ------------------------------------------- | ------------------------------------ |
+| `src/services/formCache.ts`                 | Storage, TTL, suggestions            |
+| `src/hooks/useFormCache.ts`                 | React hook for multi-field forms     |
+| `src/components/mobile/MobileFormInput.tsx` | Per-field cache + suggestion UI      |
+| `src/pages/mobile/MobileLogin.tsx`          | Cached email prefill in sign-in flow |
+| `src/components/mobile/MobileProfile.tsx`   | Profile edit prefill + persist       |
+| `src/pages/mobile/MobileRegister.tsx`       | Registration prefill + persist       |
+| `src/components/mobile/MobileSettings.tsx`  | Clear cache control                  |
 
 ## Testing
 
