@@ -24,6 +24,7 @@ export * from './useScreenReader';
 export * from './useSwipe';
 export * from './useVideoGestures';
 export * from './useVoiceRecognition';
+export * from './useStreamingData';
 
 // Optimized gesture handlers (named exports avoid duplicate SwipeDirection/SwipeInfo types)
 export { useOptimizedLongPress, OptimizedLongPressView } from './useOptimizedLongPress';
