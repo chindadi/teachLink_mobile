@@ -1,3 +1,12 @@
+# [1.7.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.6.0...v1.7.0) (2026-05-30)
+
+
+### Features
+
+* add StreamingProgressBar component for visual progress feedback ([85359f4](https://github.com/rinafcode/teachLink_mobile/commit/85359f420d2e5a8c7a30fc3988e420b887ad683f))
+* add useStreamingData hook for progressive rendering with automatic deduplication and metrics ([95f70ad](https://github.com/rinafcode/teachLink_mobile/commit/95f70ad232ba452833e79337ba817757319b728d))
+* implement streaming API service for progressive rendering with TTFB optimization ([93ae011](https://github.com/rinafcode/teachLink_mobile/commit/93ae01138a8c106f7a9b17650686247d159bac3c))
+
 # [1.6.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.5.0...v1.6.0) (2026-05-30)
 
 
