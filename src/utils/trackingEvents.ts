@@ -43,6 +43,14 @@ export enum AnalyticsEvent {
 
   // Device capability
   DEVICE_COMPLEXITY_ASSIGNED = 'device_complexity_assigned',
+
+  // Core Web Vitals
+  WEB_VITALS_LCP = 'web_vitals_lcp',
+  WEB_VITALS_FID = 'web_vitals_fid',
+  WEB_VITALS_CLS = 'web_vitals_cls',
+  WEB_VITALS_FCP = 'web_vitals_fcp',
+  WEB_VITALS_TTFB = 'web_vitals_ttfb',
+  WEB_VITALS_REGRESSION = 'web_vitals_regression',
 }
 
 /**
@@ -77,4 +85,11 @@ export enum PerformanceMetric {
   APP_LOAD_TIME = 'app_load_time',
   SCREEN_TRANSITION_TIME = 'screen_transition_time',
   API_RESPONSE_TIME = 'api_response_time',
+
+  // Core Web Vitals
+  LCP = 'lcp',
+  FID = 'fid',
+  CLS = 'cls',
+  FCP = 'fcp',
+  TTFB = 'ttfb',
 }
