@@ -7,9 +7,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/themed-view';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useDeviceUiComplexity } from '@/hooks/useDeviceUiComplexity';
+import { useTheme } from '@/src/store';
 
 import type { PropsWithChildren, ReactElement } from 'react';
 
@@ -22,13 +22,14 @@ type Props = PropsWithChildren<{
 
 const ParallaxScrollView = ({ children, headerImage, headerBackgroundColor }: Props) => {
   const backgroundColor = useThemeColor({}, 'background');
-  const colorScheme = useColorScheme() ?? 'light';
+  const colorScheme = useTheme();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
   const { shouldDisableHeavyEffects } = useDeviceUiComplexity();
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
     if (shouldDisableHeavyEffects) return {};
+
     return {
       transform: [
         {
@@ -60,6 +61,7 @@ const ParallaxScrollView = ({ children, headerImage, headerBackgroundColor }: Pr
       >
         {headerImage}
       </Animated.View>
+
       <ThemedView style={styles.content}>{children}</ThemedView>
     </Animated.ScrollView>
   );
