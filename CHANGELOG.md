@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.5.0...v1.6.0) (2026-05-30)
+
+
+### Features
+
+* **logging:** implement async batched logging to prevent UI blocking ([8e57654](https://github.com/rinafcode/teachLink_mobile/commit/8e576540f95e6827dfd2c18b216c0d80e47e09a5)), closes [#362](https://github.com/rinafcode/teachLink_mobile/issues/362)
+
 # [1.5.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.4.0...v1.5.0) (2026-05-30)
 
 
