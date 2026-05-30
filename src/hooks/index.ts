@@ -1,4 +1,3 @@
-export * from './useFormCache';
 export * from './useAdaptiveFrameRate';
 export * from './useAdaptiveTheme';
 export * from './useAnalytics';
@@ -7,6 +6,7 @@ export * from './useBiometricAuth';
 export * from './useCamera';
 export * from './useCourseProgress';
 export * from './useDynamicFontSize';
+export * from './useFormCache';
 export * from './useGestures';
 export * from './useHapticFeedback';
 export * from './useInAppPurchase';
@@ -26,10 +26,12 @@ export * from './useVideoGestures';
 export * from './useVoiceRecognition';
 
 // Optimized gesture handlers (named exports avoid duplicate SwipeDirection/SwipeInfo types)
-export { useOptimizedLongPress, OptimizedLongPressView } from './useOptimizedLongPress';
-export { useOptimizedPinchZoom, OptimizedPinchZoomView } from './useOptimizedPinchZoom';
-export { useOptimizedSwipe, OptimizedSwipeView } from './useOptimizedSwipe';
-export { useOptimizedVideoGestures, OptimizedVideoGesturesView } from './useOptimizedVideoGestures';
+export { OptimizedLongPressView, useOptimizedLongPress } from './useOptimizedLongPress';
+export { OptimizedPinchZoomView, useOptimizedPinchZoom } from './useOptimizedPinchZoom';
+export { OptimizedSwipeView, useOptimizedSwipe } from './useOptimizedSwipe';
+export { OptimizedVideoGesturesView, useOptimizedVideoGestures } from './useOptimizedVideoGestures';
 
 export * from './useDebounce';
+export * from './useKeyboardDelegate';
 export * from './usePredictivePreload';
+

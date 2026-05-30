@@ -2,16 +2,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AlertCircle, BookOpen, Lock, Mail, User } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import { MobileFormInput } from '../../components/mobile/MobileFormInput';
@@ -19,11 +18,11 @@ import { useDynamicFontSize } from '../../hooks/useDynamicFontSize';
 import { useFormCache } from '../../hooks/useFormCache';
 import { cacheFormValues } from '../../services/formCache';
 import {
-  getPasswordStrength,
-  validateConfirmPassword,
-  validateEmail,
-  validateName,
-  validatePassword,
+    getPasswordStrength,
+    validateConfirmPassword,
+    validateEmail,
+    validateName,
+    validatePassword,
 } from '../../utils/validation';
 
 interface MobileRegisterProps {
@@ -115,7 +114,7 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <KeyboardAvoidingView
+      <DelegatedKeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.kav}
       >
@@ -286,7 +285,7 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
             </View>
           )}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </DelegatedKeyboardAvoidingView>
     </SafeAreaView>
   );
 };
