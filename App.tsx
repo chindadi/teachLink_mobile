@@ -14,16 +14,18 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { setupNotificationNavigation } from './src/navigation/linking';
 import { apiClient } from './src/services/api';
 import { crashReportingService } from './src/services/cashReporting';
+import { featureCapabilities } from './src/services/featureCapabilities';
 import { mobileAuthService } from './src/services/mobileAuth';
 import {
-  addNotificationReceivedListener,
-  getLastNotificationResponse,
-  removeNotificationListener,
+    addNotificationReceivedListener,
+    getLastNotificationResponse,
+    removeNotificationListener,
 } from './src/services/pushNotifications';
 import { requestQueue } from './src/services/requestQueue';
 import socketService from './src/services/socket';
 import syncService from './src/services/syncService';
 import { useAppStore } from './src/store';
+import { useDegradationStore } from './src/store/degradationStore';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
 import { requireEnvVariables } from './src/utils/env';
 import { appLogger } from './src/utils/logger';
@@ -119,6 +121,28 @@ const App = () => {
 
     // Connect to socket when app starts
     socketService.connect();
+
+    // Initialize feature capability detection (non-blocking)
+    // This determines which features are available and updates degradation state
+    featureCapabilities.checkAllCapabilities()
+      .then(capabilities => {
+        const degradationStore = useDegradationStore.getState();
+        appLogger.infoSync('[App] Feature capabilities checked', {
+          camera: capabilities.camera.status,
+          notifications: capabilities.pushNotifications.status,
+          location: capabilities.location.status,
+        });
+        // Update degradation store with current feature statuses
+        Object.entries(capabilities).forEach(([feature, info]) => {
+          if (feature !== 'checkedAt' && 'status' in info) {
+            degradationStore.setFeatureStatus(feature as any, info.status);
+          }
+        });
+      })
+      .catch(error => {
+        appLogger.errorSync('[App] Error checking feature capabilities', error instanceof Error ? error : new Error(String(error)));
+        // Continue app startup - degradation will be detected on-demand
+      });
 
     // Initialize push notifications: request permissions and get device token
     registerForPushNotifications().then(async (token) => {
