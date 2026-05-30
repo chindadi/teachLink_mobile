@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.7.0...v1.8.0) (2026-05-30)
+
+
+### Features
+
+* **notifications:** implement efficient deduplication and batching ([#387](https://github.com/rinafcode/teachLink_mobile/issues/387)) ([45d2b95](https://github.com/rinafcode/teachLink_mobile/commit/45d2b9595775848c60fbb1ab3f1edf1f3446e872))
+
 # [1.7.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.6.0...v1.7.0) (2026-05-30)
 
 
