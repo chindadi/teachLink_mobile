@@ -5,8 +5,8 @@ import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
 import StorybookUI from './.rnstorybook';
 import './global.css';
 
-import * as Font from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
+import { loadAsync as FontLoadAsync } from 'expo-font';
+import { preventAutoHideAsync, hideAsync } from 'expo-splash-screen';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import { requireEnvVariables } from './src/config';
 import { initializeLogging } from './src/config/logging';
@@ -37,7 +37,7 @@ import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { prefetchExternalResources } from './src/utils/resourceHints';
 
 // Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+preventAutoHideAsync();
 
 // SHOW_STORYBOOK flag based on environment variable
 const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
@@ -87,7 +87,7 @@ const App = () => {
 
         // 1. Load fonts
         startupProgressService.startStep('fonts');
-        await Font.loadAsync({
+        await FontLoadAsync({
           'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
           'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
         });
@@ -126,7 +126,7 @@ const App = () => {
       } finally {
         setAppIsReady(true);
         startupProgressService.setInitializing(false);
-        await SplashScreen.hideAsync();
+        await hideAsync();
       }
     }
 
