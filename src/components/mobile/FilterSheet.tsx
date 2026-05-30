@@ -1,5 +1,5 @@
 import { Check, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   Dimensions,
   Modal,
@@ -17,8 +17,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAdaptiveFrameRate } from '../../hooks/useAdaptiveFrameRate';
-import { useAnimationStateMachine } from '../../hooks/useAnimationStateMachine';
+
+import { useAdaptiveFrameRate, useFocusTrap, useFocusRestore } from '../../hooks';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -72,20 +72,24 @@ export interface FilterSheetProps {
   onReset?: () => void;
 }
 
-export function FilterSheet({
+export const FilterSheet = ({
   visible,
   onClose,
   filters,
   values,
   onApply,
   onReset,
-}: FilterSheetProps) {
+}: FilterSheetProps) => {
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(SHEET_HEIGHT);
   const overlayOpacity = useSharedValue(0);
   const [localValues, setLocalValues] = useState<FilterValues>(values);
   const { durationMultiplier } = useAdaptiveFrameRate();
   const { animState, send, isVisible } = useAnimationStateMachine();
+
+  const containerRef = useRef<View>(null);
+  useFocusRestore(visible);
+  const { containerProps } = useFocusTrap(containerRef, visible, { autoFocus: true });
 
   const open = useCallback(() => {
     send('OPEN');
@@ -146,6 +150,10 @@ export function FilterSheet({
           <Animated.View style={[styles.overlay, overlayStyle]} />
         </Pressable>
         <Animated.View
+          ref={containerRef as any}
+          accessibilityRole="dialog"
+          accessibilityLabel="Filters sheet"
+          {...containerProps}
           style={[
             styles.sheet,
             sheetStyle,
@@ -193,7 +201,7 @@ export function FilterSheet({
       </Modal>
     </ErrorBoundary>
   );
-}
+};
 
 /**
  * Props for the FilterSection component
@@ -209,7 +217,7 @@ interface FilterSectionProps {
   onSelect: (value: string) => void;
 }
 
-function FilterSection({ label, options, selectedValue, onSelect }: FilterSectionProps) {
+const FilterSection = ({ label, options, selectedValue, onSelect }: FilterSectionProps) => {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionLabel}>{label}</Text>
@@ -232,7 +240,7 @@ function FilterSection({ label, options, selectedValue, onSelect }: FilterSectio
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   overlay: {
