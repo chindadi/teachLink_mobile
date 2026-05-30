@@ -1,3 +1,26 @@
+# [1.5.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.4.0...v1.5.0) (2026-05-30)
+
+
+### Bug Fixes
+
+* **#347:** Replace index-based keys with stable unique identifiers ([e2917f8](https://github.com/rinafcode/teachLink_mobile/commit/e2917f8f2a3c7ce19625daa12cc2a2e4b00a1275)), closes [#347](https://github.com/rinafcode/teachLink_mobile/issues/347)
+* **lint:** sort imports alphabetically and structurally to satisfy strict rule matchers ([f3215f2](https://github.com/rinafcode/teachLink_mobile/commit/f3215f278caf75123622298f2b317f2ad25c2bf7))
+
+
+### Features
+
+* **build:** add custom Babel production optimizer plugin ([3079903](https://github.com/rinafcode/teachLink_mobile/commit/3079903cf74883488599b00d9671b620a05d3cde))
+* enhance useMemoryMonitor with heap tracking, automated leak detection, and high-usage alerts ([071a2b7](https://github.com/rinafcode/teachLink_mobile/commit/071a2b7e977173b1e196cc75928fd2181d7301c6)), closes [hi#usage](https://github.com/hi/issues/usage)
+* implement font subsetting pipeline and custom font loading ([#253](https://github.com/rinafcode/teachLink_mobile/issues/253)) ([3d9bf4c](https://github.com/rinafcode/teachLink_mobile/commit/3d9bf4ce277e9afaa42b8d707278188938ca314c))
+* implement progressive app startup with visible progress indicator ([0fb5159](https://github.com/rinafcode/teachLink_mobile/commit/0fb51594797edbd9488757bbed91034614b9d314))
+* implement react.memo for expensive list item components ([ab05a9a](https://github.com/rinafcode/teachLink_mobile/commit/ab05a9af6c15f5f17231fbc92dacd65291b197d7))
+* timeout countdown with progress bar and retry button ([c11e193](https://github.com/rinafcode/teachLink_mobile/commit/c11e19325ad6435d276db027a6fc7ce462dd6efc)), closes [#11](https://github.com/rinafcode/teachLink_mobile/issues/11) [#20](https://github.com/rinafcode/teachLink_mobile/issues/20)
+
+
+### Performance Improvements
+
+* add useCallback memoization to prevent unnecessary re-renders ([87fb612](https://github.com/rinafcode/teachLink_mobile/commit/87fb612c106c99709d64d0536236ede5bf9ba86e)), closes [#5](https://github.com/rinafcode/teachLink_mobile/issues/5) [#7](https://github.com/rinafcode/teachLink_mobile/issues/7) [#29](https://github.com/rinafcode/teachLink_mobile/issues/29)
+
 # [1.4.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.3.0...v1.4.0) (2026-05-29)
 
 
