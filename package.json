@@ -51,7 +51,8 @@
     "perf:startup": "node scripts/measureStartupTime.js",
     "perf:regression": "node scripts/checkPerfRegression.js",
     "perf:update-baseline": "node scripts/updatePerfBaseline.js",
-    "size-limit": "size-limit"
+    "size-limit": "size-limit",
+    "build": "npx expo export --platform all"
   },
   "size-limit": [
     {
