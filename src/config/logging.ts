@@ -137,36 +137,58 @@ const LOG_STORAGE_PREFIX = '@teachlink/logs';
 const MAX_LOG_FILES = 10;
 const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB per file
 
+let logBuffer: StructuredLogEntry[] = [];
+let flushTimeout: ReturnType<typeof setTimeout> | null = null;
+const BATCH_FLUSH_INTERVAL_MS = 2000;
+const BATCH_FLUSH_SIZE_LIMIT = 20;
+
 /**
- * Store log entry in AsyncStorage for offline access and debugging.
- * Implements rotation: creates new files when size threshold exceeded.
+ * Flush all buffered logs to AsyncStorage in a single native bridge crossing.
  */
-export async function persistLogEntry(entry: StructuredLogEntry): Promise<void> {
+export async function flushLogQueue(): Promise<void> {
+  if (logBuffer.length === 0) return;
+
+  const logsToWrite = [...logBuffer];
+  logBuffer = [];
+
+  if (flushTimeout) {
+    clearTimeout(flushTimeout);
+    flushTimeout = null;
+  }
+
   try {
-    // Skip persistence in dev unless explicitly enabled
-    if (isDev && !process.env.LOG_TO_STORAGE) {
-      return;
-    }
+    const logData = logsToWrite.map(entry => JSON.stringify(entry)).join('\n');
 
-    const timestamp = Date.now();
-    const logData = JSON.stringify(entry);
-
-    // Get current log buffer size
     const storageKey = `${LOG_STORAGE_PREFIX}/current`;
     const currentLog = await AsyncStorage.getItem(storageKey);
     const currentSize = currentLog ? currentLog.length : 0;
 
-    // Rotate if size exceeded
     if (currentSize + logData.length > MAX_LOG_SIZE) {
       await rotateLogFiles();
     }
 
-    // Append to current log
     const newLog = currentLog ? `${currentLog}\n${logData}` : logData;
     await AsyncStorage.setItem(storageKey, newLog);
-  } catch (error) {
-    // Silent fail for storage errors to avoid logging loops
-    // In production, could send to Sentry
+  } catch {
+    // Silent fail for storage errors
+  }
+}
+
+/**
+ * Queue log entry in memory buffer for batching.
+ * Flushes to AsyncStorage periodically or when buffer limit is reached.
+ */
+export async function persistLogEntry(entry: StructuredLogEntry): Promise<void> {
+  if (isDev && !process.env.LOG_TO_STORAGE) {
+    return;
+  }
+
+  logBuffer.push(entry);
+
+  if (logBuffer.length >= BATCH_FLUSH_SIZE_LIMIT) {
+    flushLogQueue();
+  } else if (!flushTimeout) {
+    flushTimeout = setTimeout(flushLogQueue, BATCH_FLUSH_INTERVAL_MS);
   }
 }
 
@@ -199,7 +221,7 @@ async function rotateLogFiles(): Promise<void> {
 
     // Clear current log
     await AsyncStorage.setItem(`${LOG_STORAGE_PREFIX}/current`, '');
-  } catch (error) {
+  } catch {
     // Silent fail
   }
 }
@@ -311,6 +333,7 @@ export default {
   popLogContext,
   clearLogContext,
   persistLogEntry,
+  flushLogQueue,
   retrieveLogFiles,
   clearLogFiles,
   sendToRemoteLogging,
