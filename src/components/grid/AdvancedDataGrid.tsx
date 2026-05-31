@@ -1,10 +1,11 @@
-import { Filter, FilterX } from 'lucide-react-native';
-import React, { useCallback, useMemo } from 'react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter, FilterX, Upload } from 'lucide-react-native';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
     ListRenderItemInfo,
     ScrollView,
+    Share,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -12,12 +13,17 @@ import {
 } from 'react-native';
 
 import { useDataGrid, UseDataGridOptions } from '../../hooks/useDataGrid';
+import { batchImportCSV, BatchProgress } from '../../services/batchDataProcessor';
 import { ColumnDef, ExportFormat, GridRow, SortConfig, SortDirection } from '../../utils/gridUtils';
 import { ErrorBoundary } from '../common/ErrorBoundary';
-import { MemoizedSortIcon } from '../ui/MemoizedIcon';
+import { Skeleton } from '../ui/Skeleton';
 import { GridExporter } from './GridExporter';
 import { GridFiltering } from './GridFiltering';
 import { InlineEditing } from './InlineEditing';
+
+// Import for document picking (web and native)
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -186,7 +192,11 @@ export const AdvancedDataGrid = <T extends GridRow = GridRow>({
                     }}
                   >
                     {columnWidths.map((_cw, j) => (
-                      <Skeleton key={j} width={j === 0 ? 80 : j % 3 === 0 ? 100 : 70} height={14} />
+                      <Skeleton
+                        key={j}
+                        width={j === 0 ? 80 : j % 3 === 0 ? 100 : 70}
+                        height={14}
+                      />
                     ))}
                   </View>
                 ))}
@@ -344,20 +354,7 @@ const GridToolbar = ({
         )}
       </View>
       {showExporter && (
-        <TouchableOpacity
-          style={[styles.btn, activeType === 'export' && styles.btnDisabled]}
-          onPress={handleExport}
-          disabled={activeType !== null}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Export data"
-        >
-          {activeType === 'export' ? (
-            <ActivityIndicator size="small" color="#19c3e6" />
-          ) : (
-            <Download size={14} color="#19c3e6" />
-          )}
-        </TouchableOpacity>
+        <GridExporter onExport={onExport} disabled={activeType !== null} />
       )}
       {showImporter && (
         <TouchableOpacity
@@ -447,11 +444,15 @@ const HeaderRow = <T extends GridRow>({
   );
 };
 
-// ─── SortIcon (Memoized for performance) ──────────────────────────────────────
-// Issue #361: SVG components wrapped with React.memo to prevent re-renders on parent updates
+// ─── SortIcon ─────────────────────────────────────────────────────────────────
 
 const SortIcon = ({ direction }: { direction: SortDirection | null }) => {
-  return <MemoizedSortIcon direction={direction} size={13} />;
+  const color = direction ? '#19c3e6' : '#D1D5DB';
+  const size = 13;
+
+  if (direction === 'asc') return <ArrowUp size={size} color={color} />;
+  if (direction === 'desc') return <ArrowDown size={size} color={color} />;
+  return <ArrowUpDown size={size} color={color} />;
 };
 
 // ─── DataRow ──────────────────────────────────────────────────────────────────
@@ -469,62 +470,44 @@ interface DataRowProps<T extends GridRow> {
   onCancel: () => void;
 }
 
-const DataRow = React.memo(
-  function DataRow<T extends GridRow>({
-    row,
-    rowIndex,
-    columns,
-    columnWidths,
-    editingCell,
-    editError,
-    onStartEdit,
-    onChangeDraft,
-    onCommit,
-    onCancel,
-  }: DataRowProps<T>) {
-    const isEvenRow = rowIndex % 2 === 0;
+const DataRow = <T extends GridRow>({
+  row,
+  rowIndex,
+  columns,
+  columnWidths,
+  editingCell,
+  editError,
+  onStartEdit,
+  onChangeDraft,
+  onCommit,
+  onCancel,
+}: DataRowProps<T>) => {
+  const isEvenRow = rowIndex % 2 === 0;
 
-    return (
-      <View style={[styles.dataRow, isEvenRow && styles.dataRowEven]}>
-        {columns.map((col, idx) => {
-          const cellIsEditing = editingCell?.rowId === row.id && editingCell?.columnKey === col.key;
+  return (
+    <View style={[styles.dataRow, isEvenRow && styles.dataRowEven]}>
+      {columns.map((col, idx) => {
+        const cellIsEditing = editingCell?.rowId === row.id && editingCell?.columnKey === col.key;
 
-          return (
-            <View key={col.key} style={[styles.dataCell, { width: columnWidths[idx] }]}>
-              <InlineEditing
-                value={row[col.key]}
-                isEditing={cellIsEditing}
-                draft={cellIsEditing ? editingCell!.draft : ''}
-                error={cellIsEditing ? editError : null}
-                column={col as ColumnDef}
-                onStartEdit={() => onStartEdit(row.id, col.key, row[col.key])}
-                onChangeDraft={onChangeDraft}
-                onCommit={onCommit}
-                onCancel={onCancel}
-              />
-            </View>
-          );
-        })}
-      </View>
-    );
-  },
-  (prev, next) => {
-    return (
-      prev.row.id === next.row.id &&
-      prev.rowIndex === next.rowIndex &&
-      prev.columns === next.columns &&
-      prev.columnWidths === next.columnWidths &&
-      prev.editingCell?.rowId === next.editingCell?.rowId &&
-      prev.editingCell?.columnKey === next.editingCell?.columnKey &&
-      prev.editingCell?.draft === next.editingCell?.draft &&
-      prev.editError === next.editError &&
-      prev.onStartEdit === next.onStartEdit &&
-      prev.onChangeDraft === next.onChangeDraft &&
-      prev.onCommit === next.onCommit &&
-      prev.onCancel === next.onCancel
-    );
-  }
-) as <T extends GridRow>(props: DataRowProps<T>) => JSX.Element;
+        return (
+          <View key={col.key} style={[styles.dataCell, { width: columnWidths[idx] }]}>
+            <InlineEditing
+              value={row[col.key]}
+              isEditing={cellIsEditing}
+              draft={cellIsEditing ? editingCell!.draft : ''}
+              error={cellIsEditing ? editError : null}
+              column={col as ColumnDef}
+              onStartEdit={() => onStartEdit(row.id, col.key, row[col.key])}
+              onChangeDraft={onChangeDraft}
+              onCommit={onCommit}
+              onCancel={onCancel}
+            />
+          </View>
+        );
+      })}
+    </View>
+  );
+};
 
 // ─── PaginationBar ────────────────────────────────────────────────────────────
 

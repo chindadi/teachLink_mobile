@@ -30,14 +30,17 @@ export type QualityOption = {
 
 export type NetworkType = 'wifi' | 'cellular' | 'slow-cellular' | 'unknown';
 
-export const BITRATE_CAP: Record<NetworkType, number | null> = {
+export const BITRATE_CAP: { [K in NetworkType]: number | null } = {
   wifi: null,
   cellular: 1500,
   'slow-cellular': 400,
   unknown: 1500,
 };
 
-export function deriveNetworkType(state?: { type?: string | null }, isSlowConnection?: boolean): NetworkType {
+export function deriveNetworkType(
+  state?: { type?: string | null },
+  isSlowConnection: boolean = false
+): NetworkType {
   const type = (state?.type ?? '').toString().toUpperCase();
   if (type === 'WIFI' || type === 'ETHERNET') {
     return 'wifi';
@@ -126,24 +129,18 @@ export function selectAutoSource(
     return sorted[sorted.length - 1];
   }
   if (networkType === 'cellular') {
-    const capped = pickWithinBitrate(sorted, 1500);
+    const capped = pickWithinBitrate(sorted, BITRATE_CAP.cellular!);
     if (capped) {
       return capped;
     }
-    return sorted[0];
+    return sorted[Math.max(0, Math.floor(sorted.length / 2) - 1)];
   }
   if (networkType === 'slow-cellular') {
-    const capped = pickWithinBitrate(sorted, 400);
+    const capped = pickWithinBitrate(sorted, BITRATE_CAP['slow-cellular']!);
     if (capped) {
       return capped;
     }
     return sorted[0];
-  }
-  
-  // For unknown network type
-  const capped = pickWithinBitrate(sorted, 1500);
-  if (capped) {
-    return capped;
   }
   return sorted[Math.floor(sorted.length / 2)];
 }
