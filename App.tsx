@@ -20,6 +20,10 @@ import { useAppStore } from './src/store';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
 import { appLogger } from './src/utils/logger';
 import { prefetchExternalResources } from './src/utils/resourceHints';
+import { mobileAnalyticsService } from './src/services/mobileAnalytics';
+import { AnalyticsEvent, PerformanceMetric } from './src/utils/trackingEvents';
+
+const appStartTime = Date.now();
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -104,6 +108,15 @@ const App = () => {
         setAppIsReady(true);
         startupProgressService.setInitializing(false);
         await SplashScreen.hideAsync();
+
+        // Track cold start metric
+        const coldStartDuration = Date.now() - appStartTime;
+        mobileAnalyticsService.trackEvent(AnalyticsEvent.PERFORMANCE_METRIC, {
+          metric_name: PerformanceMetric.APP_LOAD_TIME,
+          metric_value: coldStartDuration,
+          launch_type: 'cold',
+        });
+        appLogger.infoSync(`[App] Cold start completed in ${coldStartDuration}ms`);
       }
     }
 
