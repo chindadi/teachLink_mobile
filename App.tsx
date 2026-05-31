@@ -8,6 +8,7 @@ import './global.css';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
+import { StartupProgressOverlay } from './src/components/common/StartupProgressOverlay';
 import { requireEnvVariables } from './src/config';
 import { initializeLogging } from './src/config/logging';
 import { AuthProvider, useAdaptiveTheme } from './src/hooks';
@@ -30,11 +31,16 @@ import syncService from './src/services/syncService';
 import { useAppStore } from './src/store';
 import { useNotificationStore } from './src/store/notificationStore';
 import { warmCriticalCaches } from './src/services/cacheWarming';
+import { startupProgressService } from './src/services/startupProgressService';
 import webVitalsService from './src/services/webVitals';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
 import { appLogger, logger } from './src/utils/logger';
 import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { prefetchExternalResources } from './src/utils/resourceHints';
+import { mobileAnalyticsService } from './src/services/mobileAnalytics';
+import { AnalyticsEvent, PerformanceMetric } from './src/utils/trackingEvents';
+
+const appStartTime = Date.now();
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -127,6 +133,15 @@ const App = () => {
         setAppIsReady(true);
         startupProgressService.setInitializing(false);
         await SplashScreen.hideAsync();
+
+        // Track cold start metric
+        const coldStartDuration = Date.now() - appStartTime;
+        mobileAnalyticsService.trackEvent(AnalyticsEvent.PERFORMANCE_METRIC, {
+          metric_name: PerformanceMetric.APP_LOAD_TIME,
+          metric_value: coldStartDuration,
+          launch_type: 'cold',
+        });
+        appLogger.infoSync(`[App] Cold start completed in ${coldStartDuration}ms`);
       }
     }
 
