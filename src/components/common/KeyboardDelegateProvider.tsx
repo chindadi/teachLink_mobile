@@ -1,74 +1,52 @@
-/**
- * KeyboardDelegateProvider
- *
- * Mounts a **single** pair of Keyboard listeners for the whole app and
- * distributes the resulting state via React context.  Any component that
- * needs keyboard height / visibility reads from `useKeyboardState()` without
- * registering its own listeners.
- *
- * Usage
- * -----
- * Wrap the app root once:
- *
- *   <KeyboardDelegateProvider>
- *     <AppNavigator />
- *   </KeyboardDelegateProvider>
- *
- * Then in any child component:
- *
- *   const { isVisible, height } = useKeyboardState();
- */
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Keyboard, KeyboardEvent, Platform } from 'react-native';
 
-import React, { createContext, useContext } from 'react';
+type KeyboardState = {
+  isKeyboardVisible: boolean;
+  keyboardHeight: number;
+};
 
-import {
-    KeyboardDelegateOptions,
-    KeyboardState,
-    useKeyboardDelegate,
-} from '../../hooks/useKeyboardDelegate';
+const defaultKeyboardState: KeyboardState = {
+  isKeyboardVisible: false,
+  keyboardHeight: 0,
+};
 
-// ─── Context ──────────────────────────────────────────────────────────────────
+const KeyboardDelegateContext = createContext<KeyboardState>(defaultKeyboardState);
 
-const KeyboardContext = createContext<KeyboardState>({
-  isVisible: false,
-  height: 0,
-  animationDuration: 250,
-});
+export const KeyboardDelegateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [keyboardState, setKeyboardState] = useState<KeyboardState>(defaultKeyboardState);
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+  const handleKeyboardShow = useCallback((event: KeyboardEvent) => {
+    setKeyboardState({
+      isKeyboardVisible: true,
+      keyboardHeight: event.endCoordinates?.height ?? 0,
+    });
+  }, []);
 
-interface KeyboardDelegateProviderProps extends KeyboardDelegateOptions {
-  children: React.ReactNode;
-}
+  const handleKeyboardHide = useCallback(() => {
+    setKeyboardState(defaultKeyboardState);
+  }, []);
 
-/**
- * Place this **once** near the root of your component tree.
- * It registers exactly two Keyboard listeners (show + hide) for the entire app.
- */
-export function KeyboardDelegateProvider({
-  children,
-  onShow,
-  onHide,
-}: KeyboardDelegateProviderProps) {
-  // Single hook call = single pair of listeners for the whole app
-  const keyboardState = useKeyboardDelegate({ onShow, onHide });
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, handleKeyboardShow);
+    const hideSubscription = Keyboard.addListener(hideEvent, handleKeyboardHide);
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [handleKeyboardHide, handleKeyboardShow]);
+
+  const value = useMemo(() => keyboardState, [keyboardState]);
 
   return (
-    <KeyboardContext.Provider value={keyboardState}>
-      {children}
-    </KeyboardContext.Provider>
+    <KeyboardDelegateContext.Provider value={value}>{children}</KeyboardDelegateContext.Provider>
   );
-}
+};
 
-// ─── Consumer hook ────────────────────────────────────────────────────────────
-
-/**
- * Returns the current keyboard state from the delegated root listener.
- * Does **not** register any additional Keyboard listeners.
- *
- * @example
- * const { isVisible, height } = useKeyboardState();
- */
-export function useKeyboardState(): KeyboardState {
-  return useContext(KeyboardContext);
-}
+export const useKeyboardState = (): KeyboardState => {
+  return useContext(KeyboardDelegateContext);
+};
