@@ -8,12 +8,12 @@ import 'react-native-reanimated';
 import '../global.css'; // NativeWind CSS
 import { MemoryProfilerOverlay } from '../components/DevTools';
 import { RetryErrorBoundary } from '../components/ErrorBoundary/RetryErrorBoundary';
-
 import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from '../src/components';
+import { ModalPortalProvider } from '../src/components/common/ModalPortal';
 import { useAnalytics } from '../src/hooks';
 import { useDeepLink } from '../src/hooks/useDeepLink';
-import { sessionRestorationService } from '../src/services/sessionRestoration';
 import { preloadService } from '../src/services/preloadService';
+import { sessionRestorationService } from '../src/services/sessionRestoration';
 import { useAppStore } from '../src/store';
 import { getPathFromDeepLink } from '../src/utils/linkParser';
 import { prefetchExternalResources } from '../src/utils/resourceHints';
@@ -36,9 +36,8 @@ const ScreenTracker = () => {
   useEffect(() => {
     if (pathname) {
       trackScreen(pathname, { segments: segments.join('/') });
-      
-      // Track and record transitions + trigger predictive preloading
 
+      // Track and record transitions + trigger predictive preloading
       if (prevPathname.current !== pathname) {
         const fromScreen = prevPathname.current;
         prevPathname.current = pathname;
@@ -48,7 +47,7 @@ const ScreenTracker = () => {
         }
 
         sessionRestorationService.saveRoute(pathname);
-        
+
         // Trigger background preloading for predicted destinations
         preloadService.preload(pathname, router);
       }
@@ -133,9 +132,27 @@ const RootLayout = () => {
 
   return (
     <ErrorBoundary boundaryName="RootLayout">
-      {/* ✅ Wrap with RetryErrorBoundary */}
       <RetryErrorBoundary>
-        <AnalyticsProvider>
-          <ScreenTracker />
-          <ThemeSync />
+        {/* ModalPortalProvider lifts modal rendering to the root, isolating modals
+            from parent re-renders. All AccessibleModal instances use this by default. */}
+        <ModalPortalProvider>
+          <AnalyticsProvider>
+            <OfflineIndicatorProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <ScreenTracker />
+                <ThemeSync />
+                <Stack>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+                </Stack>
+                <MemoryProfilerOverlay />
+              </GestureHandlerRootView>
+            </OfflineIndicatorProvider>
+          </AnalyticsProvider>
+        </ModalPortalProvider>
+      </RetryErrorBoundary>
+    </ErrorBoundary>
+  );
+};
 
+export default RootLayout;

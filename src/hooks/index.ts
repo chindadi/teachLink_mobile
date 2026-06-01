@@ -39,3 +39,5 @@ export * from './useHealthDashboard';
 export * from './usePredictivePreload';
 export * from './useReactProfiler';
 
+// Re-export modal portal hook for convenience
+export { useModalPortal } from '../components/common/ModalPortal';
