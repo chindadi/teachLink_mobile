@@ -32,3 +32,5 @@ export * from './SwipeableCoordinator';
 export * from './SwipeableRow';
 export * from './VirtualList';
 export * from './VoiceSearch';
+export * from './ProfiledScreen';
+
