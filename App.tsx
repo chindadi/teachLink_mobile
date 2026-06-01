@@ -16,7 +16,8 @@ import { mobileAuthService } from './src/services/mobileAuth';
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
-import { appLogger } from './src/utils/logger';
+import { appLogger, logger } from './src/utils/logger';
+import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { prefetchExternalResources } from './src/utils/resourceHints';
 import { mobileAnalyticsService } from './src/services/mobileAnalytics';
 import { sentryContextService } from './src/services/sentryContext';
@@ -86,12 +87,7 @@ const App = () => {
         await new Promise(resolve => setTimeout(resolve, 300));
         startupProgressService.completeStep('auth');
 
-        // 4. Initial data fetch (simulate or add real fetch)
-        startupProgressService.startStep('data');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        startupProgressService.completeStep('data');
-
-        // 5. Warm critical caches (user profile + home feed) in parallel
+        // 3. Warm critical caches (user profile + home feed) in parallel
         await warmCriticalCaches();
       } catch (e) {
         console.warn('Error during app initialization:', e);
