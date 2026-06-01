@@ -3,12 +3,10 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { Alert, AppState, AppStateStatus, InteractionManager, LogBox } from 'react-native';
 
-
-import StorybookUI from './.rnstorybook';
 import './global.css';
 
-import * as Font from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
+import { loadAsync as FontLoadAsync } from 'expo-font';
+import { preventAutoHideAsync, hideAsync } from 'expo-splash-screen';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import { initializeLogging } from './src/config/logging';
 import { AuthProvider, useAdaptiveTheme } from './src/hooks';
@@ -18,19 +16,21 @@ import { mobileAuthService } from './src/services/mobileAuth';
 import socketService from './src/services/socket';
 import { useAppStore } from './src/store';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
-import { appLogger } from './src/utils/logger';
+import { appLogger, logger } from './src/utils/logger';
+import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { prefetchExternalResources } from './src/utils/resourceHints';
 import { mobileAnalyticsService } from './src/services/mobileAnalytics';
+import { sentryContextService } from './src/services/sentryContext';
+import { flushLogQueue } from './src/config/logging';
 import { AnalyticsEvent, PerformanceMetric } from './src/utils/trackingEvents';
+import { batteryService } from './src/services/batteryService';
+import { startupProgressService } from './src/services/startupProgressService';
+import { StartupProgressOverlay } from './src/components/common/StartupProgressOverlay';
 
 const appStartTime = Date.now();
 
 // Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
-
-// SHOW_STORYBOOK flag based on environment variable
-const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
-
+preventAutoHideAsync();
 
 // Centralized structured logging initialized lazily in services bootstrap useEffect
 // requireEnvVariables();
@@ -68,7 +68,7 @@ const App = () => {
 
         // 1. Load fonts
         startupProgressService.startStep('fonts');
-        await Font.loadAsync({
+        await FontLoadAsync({
           'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
           'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
         });
@@ -87,12 +87,7 @@ const App = () => {
         await new Promise(resolve => setTimeout(resolve, 300));
         startupProgressService.completeStep('auth');
 
-        // 4. Initial data fetch (simulate or add real fetch)
-        startupProgressService.startStep('data');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        startupProgressService.completeStep('data');
-
-        // 5. Warm critical caches (user profile + home feed) in parallel
+        // 3. Warm critical caches (user profile + home feed) in parallel
         await warmCriticalCaches();
       } catch (e) {
         console.warn('Error during app initialization:', e);
@@ -117,6 +112,10 @@ const App = () => {
           launch_type: 'cold',
         });
         appLogger.infoSync(`[App] Cold start completed in ${coldStartDuration}ms`);
+
+        // Record app launch breadcrumb so every Sentry event has launch context
+        sentryContextService.trackAppLifecycle('launch');
+        sentryContextService.trackAction('app_cold_start', { durationMs: coldStartDuration });
       }
     }
 
@@ -126,15 +125,24 @@ const App = () => {
   const SESSION_REFRESH_WINDOW_MS = 5 * 60 * 1000;
 
   useEffect(() => {
-  // Lazy load Sentry after core initialization
-  InteractionManager.runAfterInteractions(() => {
-    initializeLogging().catch(err => {
-      console.error('[App] Failed to initialize logging:', err);
+    // Initialize battery monitoring
+    batteryService.initialize().catch(err => {
+      console.error('[App] Failed to initialize battery service:', err);
     });
-    // Lazy connect socket.io after core initialization
-    socketService.connect();
-  });
-}, []);
+
+    // Lazy load Sentry after core initialization
+    InteractionManager.runAfterInteractions(() => {
+      initializeLogging().catch(err => {
+        console.error('[App] Failed to initialize logging:', err);
+      });
+      // Lazy connect socket.io after core initialization
+      socketService.connect();
+    });
+
+    return () => {
+      batteryService.shutdown();
+    };
+  }, []);
 
   useEffect(() => {
     const checkSessionOnForeground = async () => {
@@ -189,9 +197,17 @@ const App = () => {
     const appStateSubscription = AppState.addEventListener('change', nextAppState => {
       const wasInBackground = appStateRef.current.match(/inactive|background/);
       const isForegrounded = nextAppState === 'active';
+      const isBackgrounded = appStateRef.current === 'active' && nextAppState.match(/inactive|background/);
 
       if (wasInBackground && isForegrounded) {
+        sentryContextService.trackAppLifecycle('foreground');
         void checkSessionOnForeground();
+      }
+
+      if (isBackgrounded) {
+        sentryContextService.trackAppLifecycle('background');
+        // Flush queued logs before going to background so nothing is lost
+        void flushLogQueue();
       }
 
       appStateRef.current = nextAppState;
@@ -217,4 +233,9 @@ const App = () => {
   );
 };
 
-export default SHOW_STORYBOOK ? StorybookUI : App;
+const AppEntry = __DEV__ && process.env.EXPO_PUBLIC_STORYBOOK === 'true'
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('./.rnstorybook').default
+  : App;
+
+export default AppEntry;

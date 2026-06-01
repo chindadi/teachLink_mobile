@@ -36,6 +36,8 @@ export { OptimizedLongPressView, useOptimizedLongPress } from './useOptimizedLon
 export { OptimizedPinchZoomView, useOptimizedPinchZoom } from './useOptimizedPinchZoom';
 export { OptimizedSwipeView, useOptimizedSwipe } from './useOptimizedSwipe';
 export { OptimizedVideoGesturesView, useOptimizedVideoGestures } from './useOptimizedVideoGestures';
+
 export * from './useHealthDashboard';
 export * from './usePredictivePreload';
+export * from './useOptimizedClipboard';
 export * from './useReactProfiler';
