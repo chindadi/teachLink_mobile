@@ -1,3 +1,11 @@
+# [1.14.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.13.0...v1.14.0) (2026-06-01)
+
+
+### Features
+
+* add resource timing metrics for API calls and image loads ([c34e734](https://github.com/rinafcode/teachLink_mobile/commit/c34e73413e1cf438aad68f7ee8a11f049714641c)), closes [#31](https://github.com/rinafcode/teachLink_mobile/issues/31) [#32](https://github.com/rinafcode/teachLink_mobile/issues/32) [#33](https://github.com/rinafcode/teachLink_mobile/issues/33) [#34](https://github.com/rinafcode/teachLink_mobile/issues/34)
+* timeout countdown with progress bar and retry button ([9a4e516](https://github.com/rinafcode/teachLink_mobile/commit/9a4e51612c12efa07259b380c35a8aff11c625d7)), closes [#11](https://github.com/rinafcode/teachLink_mobile/issues/11) [#20](https://github.com/rinafcode/teachLink_mobile/issues/20)
+
 # [1.13.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.12.0...v1.13.0) (2026-06-01)
 
 
