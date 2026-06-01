@@ -1,59 +1,43 @@
-import React, { useCallback, useState } from 'react';
-import { useRouter } from 'expo-router';
-
 import {
-  Alert,
-  ActivityIndicator,
-  LayoutAnimation,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-  UIManager,
-  View,
-} from 'react-native';
-import {
-  BarChart2,
-  Bell,
-  ChevronDown,
-  ChevronUp,
-  Download,
-  Eye,
-  Globe,
-  HardDrive,
-  Lock,
-  LogOut,
-  MapPin,
-  Play,
-  Settings2,
-  Shield,
-  Sun,
-  Trash2,
-  Type,
-  User,
-  Vibrate,
-  Wifi,
-  RefreshCw,
-  Fingerprint as FingerprintPattern,
-  Zap,
-  Database,
+    BarChart2,
+    ChevronDown,
+    ChevronUp,
+    Database,
+    Download,
+    Eye,
+    Fingerprint as FingerprintPattern,
+    Lock,
+    LogOut,
+    RefreshCw,
+    Settings2,
+    Sun,
+    Trash2,
+    User,
+    Wifi,
+    Zap,
 } from 'lucide-react-native';
+import React, { useCallback, useState } from 'react';
 
+import {
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
-import { NativeToggle } from './NativeToggle';
-import { PickerOption, SettingsPicker } from './SettingsPicker';
-import { SettingsSection } from './SettingsSection';
 import { useDynamicFontSize } from '../../hooks';
 import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 import { useFormCache } from '../../hooks/useFormCache';
-import { useTheme, useAppStore } from '../../store';
+import { useAppStore, useTheme } from '../../store';
 import { useNotificationStore } from '../../store/notificationStore';
-import { useSettingsStore, ProfileVisibility, DownloadQuality } from '../../store/settingsStore';
-import { AppText } from '../common/AppText';
+import { DownloadQuality, ProfileVisibility, useSettingsStore } from '../../store/settingsStore';
+import { configureNext } from '../../utils/layoutAnimation';
 
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { AppText } from '../common/AppText';
+import { NativeToggle } from './NativeToggle';
+import { PickerOption, SettingsPicker } from './SettingsPicker';
+import { SettingsSection } from './SettingsSection';
 
 // ─────────────────────────────────────────────────────────────
 // Shared Row
@@ -303,7 +287,7 @@ export const MobileSettings = ({
   }, []);
 
   const handleToggleAdvanced = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    configureNext();
     setShowAdvancedSettings(prev => !prev);
   }, []);
 
