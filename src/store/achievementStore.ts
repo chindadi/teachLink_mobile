@@ -1,7 +1,22 @@
+Here is the complete resolved file for `achievementStore.ts`. I kept the cleaner, syntax-error-free implicit return from the `main` branch. 
+
+Copy and paste this exact code:
+
+```typescript
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { asyncStorageJSONStorage, isRecord, unwrapPersistedState } from './persistence';
+import { useReviewStore } from './reviewStore';
+import { inAppReviewService, ReviewTrigger } from '../services/inAppReview';
+
+const triggerAchievementReview = () => {
+  const { incrementAchievementsUnlocked, getMetrics, recordReviewRequest } = useReviewStore.getState();
+  incrementAchievementsUnlocked();
+  inAppReviewService.requestReview(ReviewTrigger.ACHIEVEMENT_UNLOCKED, getMetrics()).then((result) => {
+    recordReviewRequest(ReviewTrigger.ACHIEVEMENT_UNLOCKED, result.shown, result.reason);
+  });
+};
 
 /**
  * Rarity levels for achievement badges
@@ -306,6 +321,8 @@ export const useAchievementStore = create<AchievementState>()(
               : a
           );
 
+          setTimeout(triggerAchievementReview, 500);
+
           return {
             achievements: updatedAchievements,
             achievementProgress: snapshotAchievementProgress(updatedAchievements),
@@ -325,6 +342,7 @@ export const useAchievementStore = create<AchievementState>()(
 
             // Auto-unlock if progress is complete
             if (progress.current >= progress.total) {
+              setTimeout(triggerAchievementReview, 500);
               return {
                 ...a,
                 isLocked: false,
@@ -388,3 +406,4 @@ export const useAchievementStore = create<AchievementState>()(
     }
   )
 );
+```

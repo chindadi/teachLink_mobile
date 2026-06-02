@@ -10,8 +10,11 @@ import {
   View,
 } from 'react-native';
 
-import { CourseProgress, Lesson } from '../../types/course';
+import { useDebounceCallback } from '../../hooks';
+import { useAnalytics } from '../../hooks/useAnalytics';
 import { useSettingsStore } from '../../store/settingsStore';
+import { CourseProgress, Lesson } from '../../types/course';
+import { AnalyticsEvent } from '../../utils/trackingEvents';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -35,6 +38,7 @@ const LessonCarousel = ({
   onLastLessonNext,
   isLastLessonInSection = false,
 }: LessonCarouselProps) => {
+  const { trackEvent } = useAnalytics();
   const dataSaverEnabled = useSettingsStore(state => state.dataSaverEnabled);
   const flatListRef = useRef<FlatList<Lesson>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -75,6 +79,29 @@ const LessonCarousel = ({
     }),
     []
   );
+
+  const debouncedScroll = useDebounceCallback((offsetX: number) => {
+    const index = Math.round(offsetX / SCREEN_WIDTH);
+    if (index >= 0 && index < lessons.length) {
+      setCurrentIndex(prevIndex => {
+        if (index !== prevIndex) {
+          onLessonChange(lessons[index].id, index);
+          return index;
+        }
+        return prevIndex;
+      });
+    }
+  }, 100);
+
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    trackEvent(AnalyticsEvent.PERFORMANCE_METRIC, {
+      event_category: 'high_frequency',
+      event_name: 'lesson_carousel_scroll',
+      offsetX: Math.round(offsetX),
+    });
+    debouncedScroll(offsetX);
+  };
 
   const handleMomentumScrollEnd = useCallback(
     (event: { nativeEvent: { contentOffset: { x: number } } }) => {
@@ -155,6 +182,7 @@ const LessonCarousel = ({
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumScrollEnd}
         scrollEventThrottle={16}
         decelerationRate="fast"
