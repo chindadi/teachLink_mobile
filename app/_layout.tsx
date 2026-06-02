@@ -8,7 +8,6 @@ import 'react-native-reanimated';
 import { MemoryProfilerOverlay } from '../components/DevTools';
 import { RetryErrorBoundary } from '../components/ErrorBoundary/RetryErrorBoundary';
 import '../global.css'; // NativeWind CSS
-
 import { AnalyticsProvider, ErrorBoundary, OfflineIndicatorProvider } from '../src/components';
 import { KeyboardDelegateProvider } from '../src/components/common/KeyboardDelegateProvider';
 import { useAnalytics } from '../src/hooks';
@@ -18,13 +17,9 @@ import { sessionRestorationService } from '../src/services/sessionRestoration';
 import { useAppStore } from '../src/store';
 import { getPathFromDeepLink } from '../src/utils/linkParser';
 import { prefetchExternalResources } from '../src/utils/resourceHints';
-import { initializeLayoutAnimation } from '../src/utils/layoutAnimation';
 
 // Kick off resource hints early
 prefetchExternalResources();
-
-// Initialize LayoutAnimation for Android (single initialization at app startup)
-initializeLayoutAnimation();
 
 const ScreenTracker = () => {
   const pathname = usePathname();
@@ -43,6 +38,7 @@ const ScreenTracker = () => {
       trackScreen(pathname, { segments: segments.join('/') });
 
       // Track and record transitions + trigger predictive preloading
+
       if (prevPathname.current !== pathname) {
         const fromScreen = prevPathname.current;
         prevPathname.current = pathname;
@@ -77,7 +73,7 @@ const RootLayout = () => {
   const router = useRouter();
 
   const handleDeepLink = useCallback(
-    (deepLink: any) => {
+    deepLink => {
       const path = getPathFromDeepLink(deepLink);
       if (path) {
         router.replace(path);
@@ -137,6 +133,7 @@ const RootLayout = () => {
 
   return (
     <ErrorBoundary boundaryName="RootLayout">
+      {/* ✅ Wrap with RetryErrorBoundary */}
       <RetryErrorBoundary>
         {/*
          * KeyboardDelegateProvider mounts exactly ONE pair of Keyboard
