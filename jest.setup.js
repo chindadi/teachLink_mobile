@@ -10,6 +10,7 @@ jest.mock('react-native', () => ({
   View: 'View',
   Text: 'Text',
   TouchableOpacity: 'TouchableOpacity',
+  KeyboardAvoidingView: 'KeyboardAvoidingView',
   Modal: 'Modal',
   SafeAreaView: 'SafeAreaView',
   KeyboardAvoidingView: 'KeyboardAvoidingView',
@@ -56,6 +57,10 @@ jest.mock('react-native', () => ({
       stopAnimation: jest.fn(),
     })),
     timing: jest.fn(() => ({
+      start: jest.fn(callback => callback && callback({ finished: true })),
+      stop: jest.fn(),
+    })),
+    spring: jest.fn(() => ({
       start: jest.fn(callback => callback && callback({ finished: true })),
       stop: jest.fn(),
     })),
@@ -118,6 +123,21 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   getAllKeys: jest.fn(() => Promise.resolve([])),
   multiGet: jest.fn(() => Promise.resolve([])),
   multiSet: jest.fn(() => Promise.resolve()),
+}));
+
+// Mock Sentry for native-less Jest environment
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  addBreadcrumb: jest.fn(),
+  setTag: jest.fn(),
+  setUser: jest.fn(),
+  configureScope: jest.fn(fn => fn && fn({})),
+  withScope: jest.fn(fn => fn && fn({})),
+  NativeModules: {
+    RNSentry: {},
+  },
 }));
 
 // Mock expo-secure-store to avoid ESM issues
@@ -399,3 +419,11 @@ jest.mock('react-native-svg', () => {
     Circle: RN.View,
   };
 });
+
+// Mock expo-store-review for in-app review tests
+jest.mock('expo-store-review', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  requestReview: jest.fn(() => Promise.resolve()),
+  hasAction: jest.fn(() => Promise.resolve(true)),
+  storeUrl: jest.fn(() => Promise.resolve('https://apps.apple.com/app/teachlink/id1234567890')),
+}));

@@ -1,43 +1,41 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  BookOpen,
-  Camera,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Edit3,
-  Globe,
-  Mail,
-  MapPin,
-  Save,
-  Trophy,
-  User,
-  UserCheck,
-  UserPlus,
-  Users,
-  X,
+    BookOpen,
+    Camera,
+    ChevronDown,
+    ChevronUp,
+    Clock,
+    Edit3,
+    Globe,
+    Mail,
+    MapPin,
+    Save,
+    Trophy,
+    User,
+    UserCheck,
+    UserPlus,
+    Users,
+    X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  LayoutAnimation,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  UIManager,
-  View,
+    ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
-
+import { useFormCache } from '../../hooks/useFormCache';
+import { PROFILE_FORM_CACHE_KEYS } from '../../services/formCache';
+import { configureNext } from '../../utils/layoutAnimation';
+import { AppText as Text } from '../common/AppText';
+import { CachedImage } from '../ui/CachedImage';
+import { Skeleton } from '../ui/Skeleton';
 import { Achievement, AchievementBadges } from './AchievementBadges';
 import { AvatarCamera } from './AvatarCamera';
 import { MobileFormInput } from './MobileFormInput';
 import { StatisticsDisplay } from './StatisticsDisplay';
-import { cacheFormValues } from '../../services/formCache';
-import { AppText as Text } from '../common/AppText';
-import { CachedImage } from '../ui/CachedImage';
-import { Skeleton } from '../ui/Skeleton';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -318,14 +316,16 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
   const textSecondary = isDark ? '#94a3b8' : '#64748b';
   const borderColor = isDark ? '#334155' : '#e2e8f0';
 
-  const getInitials = useCallback((name: string) =>
-    name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2),
-  []);
+  const getInitials = useCallback(
+    (name: string) =>
+      name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2),
+    []
+  );
 
   const handleStartEdit = useCallback(() => {
     setEditName(profile.name);
@@ -355,7 +355,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
   }, [profile, applyPrefillToFields]);
 
   const handleToggleAdvancedFields = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    configureNext();
     setShowAdvancedFields(prev => !prev);
   }, []);
 
@@ -472,7 +472,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
           <View style={styles.avatarRow}>
             <TouchableOpacity
               style={styles.avatarContainer}
-            onPress={handleOpenCamera}
+              onPress={handleOpenCamera}
               activeOpacity={0.85}
               accessibilityRole="button"
               accessibilityLabel="Change avatar"
@@ -787,7 +787,10 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
                       value: profile.website || 'Not set',
                     },
                   ].map((item, i) => (
-                    <View key={`detail-${i}-${item.label}`} style={[styles.detailRow, { borderBottomColor: borderColor }]}>
+                    <View
+                      key={`detail-${i}-${item.label}`}
+                      style={[styles.detailRow, { borderBottomColor: borderColor }]}
+                    >
                       <View style={styles.detailIconLabel}>
                         {item.icon}
                         <Text style={[styles.detailLabel, { color: textSecondary }]}>
