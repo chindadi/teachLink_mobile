@@ -19,6 +19,8 @@ jest.mock('react-native', () => ({
   TextInput: 'TextInput',
   ActivityIndicator: 'ActivityIndicator',
   Image: 'Image',
+  Pressable: 'Pressable',
+  TouchableWithoutFeedback: 'TouchableWithoutFeedback',
   StyleSheet: {
     create: styles => styles,
     flatten: style => (style ? (Array.isArray(style) ? Object.assign({}, ...style) : style) : {}),
@@ -121,6 +123,21 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   getAllKeys: jest.fn(() => Promise.resolve([])),
   multiGet: jest.fn(() => Promise.resolve([])),
   multiSet: jest.fn(() => Promise.resolve()),
+}));
+
+// Mock Sentry for native-less Jest environment
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  addBreadcrumb: jest.fn(),
+  setTag: jest.fn(),
+  setUser: jest.fn(),
+  configureScope: jest.fn(fn => fn && fn({})),
+  withScope: jest.fn(fn => fn && fn({})),
+  NativeModules: {
+    RNSentry: {},
+  },
 }));
 
 // Mock expo-secure-store to avoid ESM issues

@@ -47,10 +47,13 @@ const OfflineUI = React.memo((props: any) => {
 
     setToasts((prev: any) => [...prev, toast]);
 
-    // Auto-remove toast after duration
-    setTimeout(() => {
+    // Auto-remove toast after duration using requestAnimationFrame for frame-synced timing
+    const cancelSchedule = scheduleAnimationFrame(() => {
       removeToast(id);
     }, toastDuration);
+
+    // Store cancel function for cleanup if needed
+    (toast as any).cancelSchedule = cancelSchedule;
 
     return id;
   };
