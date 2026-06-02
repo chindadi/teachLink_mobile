@@ -1,49 +1,41 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  BookOpen,
-  Camera,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Edit3,
-  Globe,
-  Mail,
-  MapPin,
-  Save,
-  Trophy,
-  User,
-  UserCheck,
-  UserPlus,
-  Users,
-  X,
+    BookOpen,
+    Camera,
+    ChevronDown,
+    ChevronUp,
+    Clock,
+    Edit3,
+    Globe,
+    Mail,
+    MapPin,
+    Save,
+    Trophy,
+    User,
+    UserCheck,
+    UserPlus,
+    Users,
+    X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Animated,
-  LayoutAnimation,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  UIManager,
-  View,
+    ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useFormCache } from '../../hooks/useFormCache';
 import { PROFILE_FORM_CACHE_KEYS } from '../../services/formCache';
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { configureNext } from '../../utils/layoutAnimation';
+import { AppText as Text } from '../common/AppText';
+import { CachedImage } from '../ui/CachedImage';
+import { Skeleton } from '../ui/Skeleton';
 import { Achievement, AchievementBadges } from './AchievementBadges';
 import { AvatarCamera } from './AvatarCamera';
 import { MobileFormInput } from './MobileFormInput';
 import { StatisticsDisplay } from './StatisticsDisplay';
-import { AppText as Text } from '../common/AppText';
-import { CachedImage } from '../ui/CachedImage';
-import { Skeleton } from '../ui/Skeleton';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -391,7 +383,7 @@ export const MobileProfile: React.FC<MobileProfileProps> = ({
   }, [profile, applyPrefillToFields]);
 
   const handleToggleAdvancedFields = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    configureNext();
     setShowAdvancedFields(prev => !prev);
   }, []);
 

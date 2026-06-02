@@ -1,61 +1,47 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useRef } from 'react';
-import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
-
-import StorybookUI from './.rnstorybook';
-import './global.css';
-
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useRef } from 'react';
+import { Alert, AppState, AppStateStatus, InteractionManager, LogBox } from 'react-native';
+
+import './global.css';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
-import { requireEnvVariables } from './src/config';
+import { requireEnvVariables } from './src/config/env';
 import { initializeLogging } from './src/config/logging';
-import { AuthProvider, useAdaptiveTheme } from './src/hooks';
+import { AuthProvider, useAuth } from './src/hooks';
 import AppNavigator from './src/navigation/AppNavigator';
 import { setupNotificationNavigation } from './src/navigation/linking';
 import { apiClient } from './src/services/api';
-import { crashReportingService } from './src/services/cashReporting';
-import { memoryPressureService } from './src/services/memoryPressureService';
+import { requestQueue } from './src/services/api/requestQueue';
+import { crashReportingService } from './src/services/crashReporting';
+import { initializeFeatureFlags, refreshFeatureFlags } from './src/services/featureFlags';
 import { mobileAuthService } from './src/services/mobileAuth';
 import {
-    addNotificationReceivedListener,
-    getLastNotificationResponse,
-    registerForPushNotifications, registerTokenWithBackend,
-    removeNotificationListener,
+  addNotificationReceivedListener,
+  getLastNotificationResponse,
+  removeNotificationListener,
 } from './src/services/pushNotifications';
-import { requestQueue } from './src/services/api/requestQueue';
-import { initializeSecureStorage } from './src/services/secureStorage';
 import socketService from './src/services/socket';
-import syncService from './src/services/syncService';
+import { syncService } from './src/services/syncService';
 import { useAppStore } from './src/store';
-import { useNotificationStore } from './src/store/notificationStore';
-import { warmCriticalCaches } from './src/services/cacheWarming';
-import webVitalsService from './src/services/webVitals';
-import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
-import { appLogger, logger } from './src/utils/logger';
+import { appLogger } from './src/utils/logger';
 import { handleNotificationReceived } from './src/utils/notificationHandlers';
 import { prefetchExternalResources } from './src/utils/resourceHints';
+import { mobileAnalyticsService } from './src/services/mobileAnalytics';
+import { sentryContextService } from './src/services/sentryContext';
+import { flushLogQueue } from './src/config/logging';
+import { AnalyticsEvent, PerformanceMetric } from './src/utils/trackingEvents';
+import { batteryService } from './src/services/batteryService';
+import { startupProgressService } from './src/services/startupProgressService';
+import { StartupProgressOverlay } from './src/components/common/StartupProgressOverlay';
 
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
-
-// SHOW_STORYBOOK flag based on environment variable
-const SHOW_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === 'true';
-
+const appStartTime = Date.now();
 
 // Centralized structured logging initialized on startup
 requireEnvVariables();
 
 // Preconnect to API hosts and external resources
 prefetchExternalResources();
-
-// Initialize centralized logging on app start
-initializeLogging().catch(err => {
-  console.error('[App] Failed to initialize logging:', err);
-});
-
-// Start Core Web Vitals monitoring
-webVitalsService.init();
 
 if (__DEV__) {
   appLogger.infoSync('Development mode: centralized logger active');
@@ -68,9 +54,26 @@ if (__DEV__) {
   console.debug = () => {};
 }
 
+const FeatureFlagInitializer: React.FC = () => {
+  const auth = useAuth();
+
+  useEffect(() => {
+    initializeFeatureFlags().catch(error => {
+      appLogger.errorSync('Feature flag initialization failed', error as Error);
+    });
+  }, []);
+
+  useEffect(() => {
+    refreshFeatureFlags().catch(error => {
+      appLogger.warnSync('Feature flag refresh failed', error as Error);
+    });
+  }, [auth.user?.id]);
+
+  return null;
+};
+
 const App = () => {
-  const theme = useAppStore((state) => state.theme);
-  useAdaptiveTheme();
+  const theme = useAppStore(state => state.theme);
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [appIsReady, setAppIsReady] = React.useState(false);
@@ -87,7 +90,7 @@ const App = () => {
 
         // 1. Load fonts
         startupProgressService.startStep('fonts');
-        await Font.loadAsync({
+        await FontLoadAsync({
           'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
           'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
         });
@@ -106,12 +109,7 @@ const App = () => {
         await new Promise(resolve => setTimeout(resolve, 300));
         startupProgressService.completeStep('auth');
 
-        // 4. Initial data fetch (simulate or add real fetch)
-        startupProgressService.startStep('data');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        startupProgressService.completeStep('data');
-
-        // 5. Warm critical caches (user profile + home feed) in parallel
+        // 3. Warm critical caches (user profile + home feed) in parallel
         await warmCriticalCaches();
       } catch (e) {
         console.warn('Error during app initialization:', e);
@@ -127,6 +125,19 @@ const App = () => {
         setAppIsReady(true);
         startupProgressService.setInitializing(false);
         await SplashScreen.hideAsync();
+
+        // Track cold start metric
+        const coldStartDuration = Date.now() - appStartTime;
+        mobileAnalyticsService.trackEvent(AnalyticsEvent.PERFORMANCE_METRIC, {
+          metric_name: PerformanceMetric.APP_LOAD_TIME,
+          metric_value: coldStartDuration,
+          launch_type: 'cold',
+        });
+        appLogger.infoSync(`[App] Cold start completed in ${coldStartDuration}ms`);
+
+        // Record app launch breadcrumb so every Sentry event has launch context
+        sentryContextService.trackAppLifecycle('launch');
+        sentryContextService.trackAction('app_cold_start', { durationMs: coldStartDuration });
       }
     }
 
@@ -140,7 +151,7 @@ const App = () => {
     crashReportingService.init();
 
     // Initialize secure storage (Keychain/Keystore) for encrypted token storage
-    initializeSecureStorage().catch((error) => {
+    initializeSecureStorage().catch(error => {
       logger.error('Failed to initialize secure storage:', error);
       // Continue app startup even if secure storage init fails
       // (user will be prompted to re-authenticate if needed)
@@ -162,11 +173,8 @@ const App = () => {
     // Connect to socket when app starts
     socketService.connect();
 
-    // Start memory pressure protection early
-    memoryPressureService.init();
-
     // Initialize push notifications: request permissions and get device token
-    registerForPushNotifications().then(async (token) => {
+    registerForPushNotifications().then(async token => {
       if (token) {
         const { setPushToken, setTokenRegistered } = useNotificationStore.getState();
         setPushToken(token);
@@ -175,34 +183,17 @@ const App = () => {
       }
     });
 
-    // Start request queue monitoring
-    requestQueue.startMonitoring(apiClient);
-
-    // Initialize and start sync service for background sync
-    syncService.startAutoSync();
-
-    // Set up notification navigation handler
-    const notificationCleanup = setupNotificationNavigation();
-
-    // Listen for notifications received while app is foregrounded
-    const subscription = addNotificationReceivedListener(handleNotificationReceived);
-
-    // Check if app was launched from a notification
-    getLastNotificationResponse().then(response => {
-      if (response) {
-        appLogger.infoSync('App launched from notification', { response });
-      }
+    // Lazy load Sentry after core initialization
+    InteractionManager.runAfterInteractions(() => {
+      initializeLogging().catch(err => {
+        console.error('[App] Failed to initialize logging:', err);
+      });
+      // Lazy connect socket.io after core initialization
+      socketService.connect();
     });
 
-    // Cleanup on unmount
     return () => {
-      socketService.disconnect();
-      syncService.stopAutoSync();
-      notificationCleanup();
-      removeNotificationListener(subscription);
-      // Clean up the unhandled rejection handler
-      // @ts-ignore
-      global.onunhandledrejection = undefined;
+      batteryService.shutdown();
     };
   }, []);
 
@@ -259,9 +250,17 @@ const App = () => {
     const appStateSubscription = AppState.addEventListener('change', nextAppState => {
       const wasInBackground = appStateRef.current.match(/inactive|background/);
       const isForegrounded = nextAppState === 'active';
+      const isBackgrounded = appStateRef.current === 'active' && nextAppState.match(/inactive|background/);
 
       if (wasInBackground && isForegrounded) {
+        sentryContextService.trackAppLifecycle('foreground');
         void checkSessionOnForeground();
+      }
+
+      if (isBackgrounded) {
+        sentryContextService.trackAppLifecycle('background');
+        // Flush queued logs before going to background so nothing is lost
+        void flushLogQueue();
       }
 
       appStateRef.current = nextAppState;
@@ -280,6 +279,7 @@ const App = () => {
     <ErrorBoundary>
       <StartupProgressOverlay />
       <AuthProvider>
+        <FeatureFlagInitializer />
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         <AppNavigator />
       </AuthProvider>
@@ -287,4 +287,9 @@ const App = () => {
   );
 };
 
-export default SHOW_STORYBOOK ? StorybookUI : App;
+const AppEntry = __DEV__ && process.env.EXPO_PUBLIC_STORYBOOK === 'true'
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('./.rnstorybook').default
+  : App;
+
+export default AppEntry;
