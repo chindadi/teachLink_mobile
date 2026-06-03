@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ListRenderItemInfo,
 } from 'react-native';
+
 import { useMemoryMonitor } from '../../hooks';
 
 interface Connection {
@@ -63,7 +64,7 @@ export const ConnectionManager: React.FC<ConnectionManagerProps> = ({
           data={connections}
           renderItem={renderConnectionItem}
           keyExtractor={item => item.id}
-          removeClippedSubviews={true}
+          removeClippedSubviews
           style={styles.list}
         />
       ) : (
