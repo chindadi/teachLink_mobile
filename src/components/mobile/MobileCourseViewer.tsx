@@ -293,7 +293,7 @@ export default function MobileCourseViewer({
 
       return (
         <View style={styles.lessonContentWrapper}>
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} removeClippedSubviews={true}>
             {/* Lesson Content */}
             <View style={styles.lessonSection}>
               <Text style={styles.lessonText}>{lesson.content}</Text>

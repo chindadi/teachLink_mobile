@@ -77,6 +77,7 @@ export default function MobileSyllabus({
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      removeClippedSubviews={true}
     >
       {/* Header */}
       <View style={styles.header}>

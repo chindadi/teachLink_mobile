@@ -101,6 +101,7 @@ export const MobileRegister: React.FC<MobileRegisterProps> = ({
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
         >
           <View style={styles.header}>
             <LinearGradient

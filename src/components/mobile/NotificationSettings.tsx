@@ -85,8 +85,7 @@ export function NotificationSettings() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      {/* Permission Status Banner */}
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900" removeClippedSubviews={true}>
       {permissionStatus !== 'granted' && (
         <View className="mx-4 mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/30">
           <View className="mb-2 flex-row items-center">

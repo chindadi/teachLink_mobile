@@ -143,6 +143,7 @@ export default function MobileQuizManager({
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
         >
           {/* Header */}
           <View style={styles.header}>

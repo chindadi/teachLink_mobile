@@ -154,7 +154,7 @@ export const AdvancedDataGrid = <T extends GridRow = GridRow>({
         />
 
         {/* ── Scrollable grid area ─────────────────────────────────────────── */}
-        <ScrollView horizontal showsHorizontalScrollIndicator style={styles.horizontalScroll}>
+        <ScrollView horizontal showsHorizontalScrollIndicator style={styles.horizontalScroll} removeClippedSubviews={true}>
           <View style={{ width: totalWidth }}>
             {/* Column headers */}
             <HeaderRow

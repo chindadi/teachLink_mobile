@@ -98,6 +98,7 @@ const QuizCarousel = ({
         keyExtractor={item => item.id}
         horizontal
         pagingEnabled
+        removeClippedSubviews={true}
         showsHorizontalScrollIndicator={false}
         onScroll={trackScrollAnalytics}
         onScrollBeginDrag={() => {

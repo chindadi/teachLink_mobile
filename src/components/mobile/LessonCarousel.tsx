@@ -202,6 +202,7 @@ const LessonCarousel = ({
         keyExtractor={item => item.id}
         horizontal
         pagingEnabled
+        removeClippedSubviews={true}
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumScrollEnd}

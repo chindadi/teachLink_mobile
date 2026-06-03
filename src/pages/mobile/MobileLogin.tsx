@@ -189,6 +189,7 @@ export const MobileLogin: React.FC<MobileLoginProps> = ({
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
         >
           {/* ── Header ── */}
           <View style={styles.header}>
