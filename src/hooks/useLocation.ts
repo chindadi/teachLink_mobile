@@ -1,49 +1,158 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+/**
+ * Hook for Location Management with Graceful Degradation & Batching
+ *
+ * Usage:
+ * const { position, location, manualLocation, setManualLocation, loading, isDegraded, statusMessage, refresh, queryNearby } = useLocation();
+ */
 
-import locationService, { GetPositionOptions, Position } from '../services/location';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import locationService, { 
+  LocationData, 
+  LocationSourceType, 
+  GetPositionOptions, 
+  Position 
+} from '../services/locationService'; // Standardized service import target
+import { useDegradationStore } from '../store/degradationStore';
+import { appLogger } from '../utils/logger';
 import { Coordinates, LocationPrecision } from '../utils/geoUtils';
 
-interface UseLocationState {
+interface UseLocationReturn {
+  /** Native geographic position details (lat, lng, timestamp) */
   position: Position | null;
+  /** High-level location metadata (from GPS, cache, or manual entry) */
+  location: LocationData | null;
+  /** Manually entered location string */
+  manualLocation: string;
+  /** Set manual location string */
+  setManualLocation: (address: string) => void;
+  /** Whether location fetch is in progress */
   loading: boolean;
+  /** Unexpected runtime errors */
   error: unknown | null;
+  /** Whether location feature is degraded (no GPS / using fallback) */
+  isDegraded: boolean;
+  /** Human-friendly status message */
+  statusMessage: string;
+  /** Request location permission */
+  requestPermission: () => Promise<boolean>;
+  /** Refresh current location with optional performance overrides */
+  refresh: (overrides?: GetPositionOptions) => Promise<Position | null>;
+  /** Clear cached location tracking data */
+  clearCachedLocation: () => void;
+  /** Run a location-keyed backend query, automatically batched with nearby queries */
+  queryNearby: <T>(
+    coords: Coordinates,
+    query: (c: Coordinates) => Promise<T>,
+    precision?: LocationPrecision
+  ) => Promise<T>;
 }
 
-/**
- * React wrapper around the location service.
- *
- * Defaults to `coarse` precision to favour battery life; pass
- * `{ precision: 'fine' }` only for flows that genuinely need ~1m accuracy.
- * Reads are cached/coalesced by the service, so calling `refresh` from many
- * components is cheap. Location-keyed backend queries can be batched with
- * `queryNearby`.
- */
-export function useLocation(defaultOptions: GetPositionOptions = {}) {
-  const [state, setState] = useState<UseLocationState>({
-    position: null,
-    loading: false,
-    error: null,
-  });
-  const optionsRef = useRef(defaultOptions);
-  optionsRef.current = defaultOptions;
+export const useLocation = (defaultOptions: GetPositionOptions = {}): UseLocationReturn => {
+  const [position, setPosition] = useState<Position | null>(null);
+  const [location, setLocation] = useState<LocationData | null>(null);
+  const [manualLocation, setManualLocationState] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<unknown | null>(null);
+  const [isDegraded, setIsDegraded] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
+  const degradationStore = useDegradationStore();
+  
+  // Safe persistence for configuration changes across renders without re-triggering hooks
+  const optionsRef = useRef(defaultOptions);
   useEffect(() => {
-    void locationService.hydrate();
+    optionsRef.current = defaultOptions;
+  }, [defaultOptions]);
+
+  /**
+   * Request location permission
+   */
+  const requestPermission = useCallback(async (): Promise<boolean> => {
+    const granted = await locationService.requestPermission();
+    if (granted) {
+      setIsDegraded(false);
+      setStatusMessage('Location permission granted');
+    } else {
+      setIsDegraded(true);
+      setStatusMessage('Location permission denied - manual entry available');
+    }
+    return granted;
   }, []);
 
-  const refresh = useCallback(async (overrides?: GetPositionOptions) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+  /**
+   * Refresh current location with performance options and fallback chain
+   */
+  const refresh = useCallback(async (overrides?: GetPositionOptions): Promise<Position | null> => {
+    setLoading(true);
+    setError(null);
     try {
-      const position = await locationService.getCurrentPosition({
+      appLogger.infoSync('[useLocation] Refreshing location position mapping');
+      
+      // Fetch underlying position using main-branch configuration merges
+      const nativePosition = await locationService.getCurrentPosition({
         ...optionsRef.current,
         ...overrides,
       });
-      setState({ position, loading: false, error: null });
-      return position;
-    } catch (error) {
-      setState((prev) => ({ ...prev, loading: false, error }));
+      setPosition(nativePosition);
+
+      // Pass down parameters to downstream graceful degradation engines
+      const locationData = await locationService.getLocationWithFallback(manualLocation);
+
+      if (locationData) {
+        setLocation(locationData);
+        setStatusMessage(locationService.getStatusMessage(locationData));
+
+        if (locationData.source === LocationSourceType.MANUAL && locationData.address) {
+          setManualLocationState(locationData.address);
+        }
+
+        const degradedMode = locationData.source !== LocationSourceType.GPS;
+        setIsDegraded(degradedMode);
+        degradationStore.setFeatureStatus('location', degradedMode ? 'degraded' : 'available');
+      } else {
+        setLocation(null);
+        setIsDegraded(true);
+        setStatusMessage('Please enter your location manually');
+      }
+
+      return nativePosition;
+    } catch (err) {
+      appLogger.errorSync('[useLocation] Error refreshing location', err instanceof Error ? err : new Error(String(err)));
+      setError(err);
+      setIsDegraded(true);
+      setStatusMessage('Location refresh failed - please enter manually');
+      degradationStore.setFeatureStatus('location', 'degraded');
       return null;
+    } finally {
+      setLoading(false);
     }
+  }, [manualLocation, degradationStore]);
+
+  /**
+   * Set manual location
+   */
+  const handleSetManualLocation = useCallback((address: string): void => {
+    if (address.trim()) {
+      const locationData = locationService.setManualLocation(address);
+      setLocation(locationData);
+      setManualLocationState(address);
+      setStatusMessage(`Location saved: ${address}`);
+      setIsDegraded(true); // Manual fallback triggers a degraded state marker
+      degradationStore.setFeatureStatus('location', 'degraded');
+      appLogger.infoSync('[useLocation] Manual location set', { address });
+    }
+  }, [degradationStore]);
+
+  /**
+   * Clear cached location
+   */
+  const clearCachedLocation = useCallback((): void => {
+    locationService.clearCachedLocation();
+    setLocation(null);
+    setPosition(null);
+    setManualLocationState('');
+    setStatusMessage('Location cleared');
+    appLogger.infoSync('[useLocation] Location cleared');
   }, []);
 
   /**
@@ -51,7 +160,7 @@ export function useLocation(defaultOptions: GetPositionOptions = {}) {
    * nearby queries (same precision cell) issued in the same window.
    */
   const queryNearby = useCallback(
-    <T>(
+    <T,>(
       coords: Coordinates,
       query: (c: Coordinates) => Promise<T>,
       precision: LocationPrecision = 'coarse',
@@ -59,11 +168,41 @@ export function useLocation(defaultOptions: GetPositionOptions = {}) {
     [],
   );
 
+  /**
+   * Hydrate local system, check permission, and attempt to resolve location on mount
+   */
+  useEffect(() => {
+    const initLocation = async () => {
+      // Main branch hydration sequence
+      await locationService.hydrate();
+
+      const hasPermission = await locationService.checkPermission();
+      if (hasPermission) {
+        await refresh();
+      } else {
+        setIsDegraded(true);
+        setStatusMessage('Location permission required - manual entry available');
+        degradationStore.setFeatureStatus('location', 'degraded');
+      }
+    };
+
+    initLocation();
+  }, []);
+
   return {
-    ...state,
+    position,
+    location,
+    manualLocation,
+    setManualLocation: handleSetManualLocation,
+    loading,
+    error,
+    isDegraded,
+    statusMessage,
+    requestPermission,
     refresh,
+    clearCachedLocation,
     queryNearby,
   };
-}
+};
 
 export default useLocation;
