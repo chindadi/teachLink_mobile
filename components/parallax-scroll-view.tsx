@@ -9,7 +9,8 @@ import Animated, {
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useDeviceUiComplexity } from '@/hooks/useDeviceUiComplexity';
-import { useTheme } from '@/src/store';
+
+import { useTheme } from '../src/store';
 
 import type { PropsWithChildren, ReactElement } from 'react';
 
@@ -40,11 +41,7 @@ const ParallaxScrollView = ({ children, headerImage, headerBackgroundColor }: Pr
           ),
         },
         {
-          scale: interpolate(
-            scrollOffset.value,
-            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [2, 1, 1]
-          ),
+          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
         },
       ],
     };
