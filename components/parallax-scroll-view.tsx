@@ -9,8 +9,7 @@ import Animated, {
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useDeviceUiComplexity } from '@/hooks/useDeviceUiComplexity';
-
-import { useTheme } from '../src/store';
+import { useTheme } from '@/store';
 
 import type { PropsWithChildren, ReactElement } from 'react';
 
