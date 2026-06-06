@@ -4,6 +4,7 @@ import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
   useScrollOffset,
+  useSharedValue,
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/themed-view';
@@ -26,9 +27,11 @@ const ParallaxScrollView = ({ children, headerImage, headerBackgroundColor }: Pr
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
   const { shouldDisableHeavyEffects } = useDeviceUiComplexity();
+  const disableEffects = useSharedValue(shouldDisableHeavyEffects);
+  disableEffects.value = shouldDisableHeavyEffects;
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
-    if (shouldDisableHeavyEffects) return {};
+    if (disableEffects.value) return {};
 
     return {
       transform: [

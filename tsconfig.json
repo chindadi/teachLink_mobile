@@ -15,8 +15,6 @@
       "@utils/*": ["src/utils/*"],
       "@/components/*": ["./src/components/*", "./components/*"],
       "@/hooks/*": ["./src/hooks/*", "./hooks/*"],
-      "@/store": ["./src/store/index"],
-      "@/store/*": ["./src/store/*"],
       "@/constants/*": ["./constants/*"],
       "@/*": ["./src/*", "./*"]
     },
