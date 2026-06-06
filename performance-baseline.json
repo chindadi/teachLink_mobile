@@ -1,15 +1,15 @@
 {
   "_comment": "Performance baseline. Update with: npm run perf:update-baseline",
   "version": "1.0.0",
-  "timestamp": "2026-05-29T00:00:00.000Z",
+  "timestamp": "2026-06-06T00:00:00.000Z",
   "bundleSize": {
-    "android_bytes": 2000000,
-    "ios_bytes": 1900000,
-    "total_bytes": 3900000
+    "android_bytes": 4000000,
+    "ios_bytes": 3800000,
+    "total_bytes": 7800000
   },
   "startupTime": {
-    "p50_ms": 800,
-    "p95_ms": 1200
+    "p50_ms": 50,
+    "p95_ms": 200
   },
   "apiLatency": {
     "p50_ms": 200,

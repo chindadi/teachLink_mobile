@@ -48,6 +48,9 @@ export enum AnalyticsEvent {
   API_ERROR = 'api_error',
   CRASH_REPORT = 'crash_report',
 
+  // Device capability
+  DEVICE_COMPLEXITY_ASSIGNED = 'device_complexity_assigned',
+
   // Core Web Vitals
   WEB_VITALS_LCP = 'web_vitals_lcp',
   WEB_VITALS_FID = 'web_vitals_fid',
