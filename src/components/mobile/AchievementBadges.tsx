@@ -199,6 +199,7 @@ export const AchievementBadges: React.FC<AchievementBadgesProps> = React.memo(({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           accessibilityLabel="Horizontal achievements list"
+          removeClippedSubviews={true}
         >
           {achievements.map(renderBadge)}
         </ScrollView>

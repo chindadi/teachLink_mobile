@@ -175,6 +175,7 @@ export const FilterSheet = ({
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            removeClippedSubviews={true}
           >
             {filters.map(field => (
               <FilterSection
