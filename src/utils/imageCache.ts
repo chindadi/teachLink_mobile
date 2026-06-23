@@ -2,13 +2,12 @@ import { backgroundScheduler } from '../services/backgroundTaskScheduler';
 import { Image } from 'expo-image';
 
 import logger from './logger';
-import { buildImageUrl } from './imageFormat';
 import { _backgroundScheduler } from '../services/backgroundTaskScheduler';
 
 export class ImageCache {
   /**
    * Prefetches an array of image URLs to memory or disk.
-   * URLs are automatically transformed to the optimal format (WebP) for bandwidth reduction.
+   * Useful for pre-loading images before they are rendered in a fast-scrolling list.
    *
    * @param urls Array of image URLs to prefetch
    * @returns A promise that resolves to an array of boolean flags indicating success
@@ -19,10 +18,8 @@ export class ImageCache {
       
       const promises = urls.map(async (url) => {
         if (!url) return false;
-        const optimizedUrl = buildImageUrl(url);
-        if (!optimizedUrl) return false;
         try {
-          return await Image.prefetch(optimizedUrl);
+          return await Image.prefetch(url);
         } catch (e) {
           logger.warn(`Failed to prefetch image: ${url}`, e);
           return false;

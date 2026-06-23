@@ -28,7 +28,6 @@
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getEnv } from "../../config";
-import { getImageAcceptHeader } from "../../utils/imageFormat";
 import { appLogger } from "../../utils/logger";
 import { startTiming, notifyEntry } from "../../utils/performanceTiming";
 import { getAccessToken, getRefreshToken, saveTokens } from "../secureStorage";
@@ -114,7 +113,7 @@ apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const url = config.url ?? '';
     if (IMAGE_PATH_PATTERNS.some((pattern) => pattern.test(url))) {
-      config.headers.Accept = getImageAcceptHeader();
+      config.headers.Accept = 'image/avif,image/webp,image/png,image/jpeg,*/*;q=0.8';
     }
     return config;
   },
