@@ -42,3 +42,4 @@ export * from './useHealthDashboard';
 export * from './usePredictivePreload';
 export * from './useOptimizedClipboard';
 export * from './useReactProfiler';
+export * from './useTouchDeduplication';
