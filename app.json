@@ -87,7 +87,8 @@
         }
       ],
       "expo-speech-recognition",
-      "expo-video"
+      "expo-video",
+      "@sentry/react-native"
     ],
     "notification": {
       "icon": "./assets/notification-icon.png",
