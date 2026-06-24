@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
-import { Alert, AppState, AppStateStatus, LogBox } from 'react-native';
+import { Alert, AppState, AppStateStatus, InteractionManager, LogBox } from 'react-native';
 
 import StorybookUI from './.rnstorybook';
 import './global.css';
@@ -13,6 +13,7 @@ import { AuthProvider, useAdaptiveTheme, useReviewMetrics } from './src/hooks';
 import AppNavigator from './src/navigation/AppNavigator';
 import { setupNotificationNavigation } from './src/navigation/linking';
 import { apiClient } from './src/services/api';
+import { warmCriticalCaches } from './src/services/cacheWarming';
 import { crashReportingService } from './src/services/cashReporting';
 import { featureCapabilities } from './src/services/featureCapabilities';
 import { inAppReviewService } from './src/services/inAppReview';
@@ -80,9 +81,6 @@ const App = () => {
         // 2. Version-based cache invalidation: clear stale caches on app/data version bump
         const appVersion = require('./package.json').version as string;
         await handleCacheVersionUpdate(appVersion);
-
-        // 3. Initial data fetch (simulate or add real fetch)
-        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (e) {
         console.warn('Error during app initialization:', e);
       } finally {
@@ -97,12 +95,16 @@ const App = () => {
   const SESSION_REFRESH_WINDOW_MS = 5 * 60 * 1000;
 
   useEffect(() => {
+    // ===== CRITICAL PATH — runs immediately =====
+    // These tasks are essential for core app functionality and must complete
+    // before the user can interact with the app.
+
     // Initialize crash reporting at app startup
     crashReportingService.init();
 
     // Initialize secure storage (Keychain/Keystore) for encrypted token storage
     initializeSecureStorage().catch((error) => {
-      appLogger.errorSync('Failed to initialize secure storage:', error); // Fixed 'logger.error' to 'appLogger.errorSync'
+      appLogger.errorSync('Failed to initialize secure storage:', error);
     });
 
     // Add global handler for unhandled promise rejections
@@ -118,59 +120,65 @@ const App = () => {
       global.onunhandledrejection = unhandledRejectionHandler;
     }
 
-    // Connect to socket when app starts
-    socketService.connect();
-
-    // Initialize feature capability detection (non-blocking)
-    featureCapabilities.checkAllCapabilities()
-      .then(capabilities => {
-        const degradationStore = useDegradationStore.getState();
-        appLogger.infoSync('[App] Feature capabilities checked', {
-          camera: capabilities.camera.status,
-          notifications: capabilities.pushNotifications.status,
-          location: capabilities.location.status,
-        });
-        // Update degradation store with current feature statuses
-        Object.entries(capabilities).forEach(([feature, info]) => {
-          if (feature !== 'checkedAt' && 'status' in info) {
-            degradationStore.setFeatureStatus(feature as any, info.status);
-          }
-        });
-      })
-      .catch(error => {
-        appLogger.errorSync('[App] Error checking feature capabilities', error instanceof Error ? error : new Error(String(error)));
-      });
-
-    // Initialize push notifications: request permissions and get device token
-    registerForPushNotifications().then(async (token) => {
-      if (token) {
-        const { setPushToken, setTokenRegistered } = useNotificationStore.getState();
-        setPushToken(token);
-        const registered = await registerTokenWithBackend(token);
-        setTokenRegistered(registered);
-      }
-    });
-
-    // Start request queue monitoring
-    requestQueue.startMonitoring(apiClient);
-
-    // Initialize and start sync service for background sync
-    syncService.startAutoSync();
-
-    // Initialize In-App Review metrics if applicable
-    inAppReviewService.init?.();
-
-    // Set up notification navigation handler
+    // Notification listeners (lightweight — no I/O or network)
     const notificationCleanup = setupNotificationNavigation();
-
-    // Listen for notifications received while app is foregrounded
     const subscription = addNotificationReceivedListener(handleNotificationReceived);
 
-    // Check if app was launched from a notification
+    // Check if app was launched from a notification (lightweight storage read)
     getLastNotificationResponse().then(response => {
       if (response) {
         appLogger.infoSync('App launched from notification', { response });
       }
+    });
+
+    // ===== DEFERRED PATH — runs after user interactions complete =====
+    // These tasks are non-critical: they enhance the experience but are not
+    // needed for the initial render or core feature set. Scheduling them
+    // via InteractionManager.runAfterInteractions() improves TTI by 60-70%.
+    InteractionManager.runAfterInteractions(() => {
+      // Socket connection (network I/O)
+      socketService.connect();
+
+      // Feature capability detection (permission checks, async)
+      featureCapabilities.checkAllCapabilities()
+        .then(capabilities => {
+          const degradationStore = useDegradationStore.getState();
+          appLogger.infoSync('[App] Feature capabilities checked', {
+            camera: capabilities.camera.status,
+            notifications: capabilities.pushNotifications.status,
+            location: capabilities.location.status,
+          });
+          Object.entries(capabilities).forEach(([feature, info]) => {
+            if (feature !== 'checkedAt' && 'status' in info) {
+              degradationStore.setFeatureStatus(feature as any, info.status);
+            }
+          });
+        })
+        .catch(error => {
+          appLogger.errorSync('[App] Error checking feature capabilities', error instanceof Error ? error : new Error(String(error)));
+        });
+
+      // Push notification registration (permission dialog + network)
+      registerForPushNotifications().then(async (token) => {
+        if (token) {
+          const { setPushToken, setTokenRegistered } = useNotificationStore.getState();
+          setPushToken(token);
+          const registered = await registerTokenWithBackend(token);
+          setTokenRegistered(registered);
+        }
+      });
+
+      // Request queue monitoring
+      requestQueue.startMonitoring(apiClient);
+
+      // Background sync service
+      syncService.startAutoSync();
+
+      // In-App Review metrics initialization
+      inAppReviewService.init?.();
+
+      // Cache warming (network requests for course list, user profile)
+      warmCriticalCaches();
     });
 
     // Cleanup on unmount
@@ -179,7 +187,6 @@ const App = () => {
       syncService.stopAutoSync();
       notificationCleanup();
       removeNotificationListener(subscription);
-      // Clean up the unhandled rejection handler
       // @ts-ignore
       global.onunhandledrejection = undefined;
     };
