@@ -9,6 +9,8 @@ export * from './useCoursePagination';
 export * from './useCourseProgress';
 export * from './useDebounce';
 export * from './useDynamicFontSize';
+export * from './useFormCache';
+export * from './useFormValidation';
 export * from './useFeatureFlags';
 export * from './useGestures';
 export * from './useHapticFeedback';
@@ -44,4 +46,6 @@ export { useFlatListScrollRestoration } from '../../hooks/useFlatListScrollResto
 export { OptimizedLongPressView, useOptimizedLongPress } from './useOptimizedLongPress';
 export { OptimizedPinchZoomView, useOptimizedPinchZoom } from './useOptimizedPinchZoom';
 export { OptimizedSwipeView, useOptimizedSwipe } from './useOptimizedSwipe';
+export * from './useDashboardMetrics';
 export { OptimizedVideoGesturesView, useOptimizedVideoGestures } from './useOptimizedVideoGestures';
+
