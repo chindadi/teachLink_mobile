@@ -133,6 +133,8 @@ export const useAppStore = create<AppState>()(
   )
 );
 
-export * from './notificationStore';
 export * from './courseProgressStore';
+export * from './metricsStore';
+export * from './notificationStore';
 export * from './selectors';
+
