@@ -79,15 +79,6 @@ class SyncService {
     };
 
     // Subscribe to battery status changes to adjust sync frequency
-    useDeviceStore.subscribe(
-      (state: any, prevState: any) => {
-        // react to low battery toggles
-        if (state.isLowBattery !== prevState.isLowBattery) {
-          logger.info(`SyncService: Low battery status changed to ${state.isLowBattery}, restarting auto-sync`);
-          if (this.syncIntervalId) {
-            this.stopAutoSync();
-            this.startAutoSync();
-          }
     useDeviceStore.subscribe((state: any, prevState: any) => {
       if (state.isLowBattery !== prevState.isLowBattery) {
         logger.info(

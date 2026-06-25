@@ -361,7 +361,9 @@ describe('usePrefetchImages — issue #233', () => {
     mockGetNetworkState.mockResolvedValue(WIFI_STATE);
     jest.spyOn(ImageCache, 'prefetchImages').mockResolvedValue([true, true, true]);
 
-    renderHook(() => usePrefetchImages(URLS, { auto: true, aggressiveness: 'moderate' }));
+    const { result } = renderHook(() =>
+      usePrefetchImages(URLS, { auto: true, aggressiveness: 'moderate' })
+    );
 
     await act(async () => {
       await jest.runAllTimersAsync();
