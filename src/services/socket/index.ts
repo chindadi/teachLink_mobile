@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
+import { useSocketStore } from '../../store';
 import { decodeBinaryMessage, encodeBinaryMessage } from './binaryProtocol';
 import { getEnv } from '../../config';
 import { appLogger } from '../../utils/logger';
@@ -7,9 +8,6 @@ import syncEntityManager from '../sync/syncEntityManager';
 
 import type { ConflictResolutionStrategy, VersionedSyncMessage } from '../sync/types';
 
-const RECONNECTION_ATTEMPTS = 10;
-const RECONNECTION_DELAY_MS = 1_000;
-const RECONNECTION_DELAY_MAX_MS = 30_000;
 
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const HEARTBEAT_TIMEOUT_MS = 5_000;
@@ -18,6 +16,7 @@ const BACKOFF_DELAYS = [1_000, 2_000, 4_000, 8_000, 16_000, 32_000, 60_000];
 
 class SocketService {
   private socket: Socket | null = null;
+  private stableConnectionTimeout?: NodeJS.Timeout;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private pongTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
   private backoffIndex = 0;
@@ -43,12 +42,24 @@ class SocketService {
         if (transport) {
           appLogger.debug(`Socket active transport: ${transport.name}`);
         }
+        
+        // Reset connection state after stable 60s connection
+        if (this.stableConnectionTimeout) {
+          clearTimeout(this.stableConnectionTimeout);
+        }
+        this.stableConnectionTimeout = setTimeout(() => {
+          useSocketStore.getState().resetConnection();
+        }, 60000);
+
         this.backoffIndex = 0;
         this.startHeartbeat();
       });
 
       this.socket.on('disconnect', (reason: string) => {
         appLogger.warn('Socket disconnected:', reason);
+        if (this.stableConnectionTimeout) {
+          clearTimeout(this.stableConnectionTimeout);
+        }
         this.stopHeartbeat();
         if (!this.intentionalDisconnect && reason !== 'io client disconnect') {
           this.scheduleReconnect();
@@ -118,12 +129,16 @@ class SocketService {
 
     appLogger.info(`Socket reconnecting in ${actualDelay}ms (backoff index: ${this.backoffIndex})`);
 
+    useSocketStore.getState().setReconnectAttempts(this.backoffIndex + 1);
+
     this.reconnectTimer = setTimeout(() => {
       if (this.socket) {
         this.socket.connect();
       }
       if (this.backoffIndex < BACKOFF_DELAYS.length - 1) {
         this.backoffIndex++;
+      } else {
+        useSocketStore.getState().setConnectionFailed(true);
       }
     }, actualDelay);
   }

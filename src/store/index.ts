@@ -146,4 +146,5 @@ export * from './metricsStore';
 export * from './notificationStore';
 export * from './reviewStore';
 export * from './selectors';
+export * from './socketStore';
 export * from './syncStore';
