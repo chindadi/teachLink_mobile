@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ListRenderItemInfo,
 } from 'react-native';
+
 import { useMemoryMonitor } from '../../hooks';
 
 interface Connection {
@@ -28,7 +29,8 @@ export const ConnectionManager: React.FC<ConnectionManagerProps> = ({
 }) => {
   useMemoryMonitor({ componentId: 'ConnectionManager', itemCount: connections.length });
 
-  const renderConnectionItem = ({ item }: ListRenderItemInfo<Connection>) => (
+  const renderConnectionItem = useCallback(
+    ({ item }: ListRenderItemInfo<Connection>) => (
     <View style={styles.connectionItem}>
       <View style={styles.connectionInfo}>
         {/* Placeholder for Avatar */}
@@ -46,7 +48,7 @@ export const ConnectionManager: React.FC<ConnectionManagerProps> = ({
         </TouchableOpacity>
       )}
     </View>
-  );
+  ), [onRemoveConnection]);
 
   const getConnectionItemLayout = useCallback(
     (_data: ArrayLike<Connection> | null | undefined, index: number) => ({
@@ -72,7 +74,7 @@ export const ConnectionManager: React.FC<ConnectionManagerProps> = ({
           data={connections}
           renderItem={renderConnectionItem}
           keyExtractor={item => item.id}
-          getItemLayout={getConnectionItemLayout}
+          removeClippedSubviews
           style={styles.list}
         />
       ) : (
