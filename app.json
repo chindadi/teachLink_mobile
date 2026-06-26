@@ -14,7 +14,8 @@
       "bundleIdentifier": "com.jaynomyaro.teachlink",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"],
-        "NSCameraUsageDescription": "TeachLink uses the camera to scan QR codes and open deep links."
+        "NSCameraUsageDescription": "TeachLink uses the camera to scan QR codes and open deep links.",
+        "LSApplicationQueriesSchemes": ["cydia"]
       },
       "associatedDomains": ["applinks:teachlink.com", "applinks:www.teachlink.com"],
       "buildNumber": "1",
