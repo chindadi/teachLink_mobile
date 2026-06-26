@@ -1,4 +1,4 @@
-# [1.7.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.7.0) (2026-06-26)
+# [1.8.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.8.0) (2026-06-26)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * add build script for CI workflow ([a7d27fa](https://github.com/rinafcode/teachLink_mobile/commit/a7d27fa6245ab1595fa9d99a7ca7b8ea7d672a9a))
 * add environment variables to all CI workflows ([2967357](https://github.com/rinafcode/teachLink_mobile/commit/2967357d147ed2c2adb9b62ad36d2613972f28fc))
 * add expo-store-review dependency and test mocks ([805c115](https://github.com/rinafcode/teachLink_mobile/commit/805c115b3296e70504a7b5b92348464103b544cd))
+* add getItemLayout to FlatLists for virtualization performance ([0a6ec35](https://github.com/rinafcode/teachLink_mobile/commit/0a6ec35a08b415fdf21cff55cdba0fae4d6e1fd5))
 * allow lint warnings and use npm install in test workflow ([ef02e06](https://github.com/rinafcode/teachLink_mobile/commit/ef02e06aaea3e0fb7f1c7f5091e4a0202b5b8d77))
 * cap metrics buffers, add auto‑flush and memory‑pressure flushing ([5446605](https://github.com/rinafcode/teachLink_mobile/commit/54466057104e31964e99922fd9e1ea498ece9f1d))
 * change npm ci to npm install in workflows ([2fedf36](https://github.com/rinafcode/teachLink_mobile/commit/2fedf36d6cecd3d492896ccd57a4a8863a03967f))
@@ -17,6 +18,7 @@
 * refactor component tree to reduce re-render propagation ([a634d31](https://github.com/rinafcode/teachLink_mobile/commit/a634d31c5d387027b6bba3cef227459d6c1e3c03))
 * rename streaming test to TSX for JSX parsing support and commit updated lockfile ([be458bf](https://github.com/rinafcode/teachLink_mobile/commit/be458bf4a8267e8999eba3dddedb2c44c165ea1d))
 * resolve CI failures, dependency mismatches and security vulnerabilities ([4a151d9](https://github.com/rinafcode/teachLink_mobile/commit/4a151d9f71ae983572f9a3ec4f46e8ef4c318653))
+* resolve CI test failures by fixing test mocks and expectations ([031214c](https://github.com/rinafcode/teachLink_mobile/commit/031214c100e9856b7a3b4c079c4c648a16ad0655))
 * resolve CI test failures from bad merge artifacts ([b9e0e82](https://github.com/rinafcode/teachLink_mobile/commit/b9e0e828c9ad7d4460b4686a6bacbef9f52f68e7))
 * resolve ESLint errors — remove stale ScrollView ref, fix import order, wire onScroll handlers ([6cceac1](https://github.com/rinafcode/teachLink_mobile/commit/6cceac15500398e1338b1386bfbeac44d347234f))
 * resolve failing test suites for secureStorage, streaming, videoQuality, notifications, and card components ([239ca24](https://github.com/rinafcode/teachLink_mobile/commit/239ca24f742cccd20be5489263761863eb591c78))
