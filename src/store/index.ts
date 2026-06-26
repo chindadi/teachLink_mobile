@@ -37,22 +37,11 @@ interface AppState {
   setError: (error: string | null) => void;
 }
 
-/**
- * Zustand-compatible StateStorage adapter backed by expo-secure-store.
- * Values are serialised as JSON strings since SecureStore only handles strings.
- */
-const secureStorageAdapter: StateStorage = {
-  getItem: async (name: string) => {
-    const value = await SecureStore.getItemAsync(name);
-    return value ?? null;
-  },
-  setItem: async (name: string, value: string) => {
-    await SecureStore.setItemAsync(name, value);
-  },
-  removeItem: async (name: string) => {
-    await SecureStore.deleteItemAsync(name);
-  },
-};
+const secureStorage = createJSONStorage(() => ({
+  getItem: SecureStore.getItemAsync,
+  setItem: SecureStore.setItemAsync,
+  removeItem: SecureStore.deleteItemAsync,
+}));
 
 export const useAppStore = create<AppState>()(
   devtools(
@@ -66,6 +55,7 @@ export const useAppStore = create<AppState>()(
         refreshToken: null,
         sessionExpiresAt: null,
         sessionExpiringSoon: false,
+        theme: "light",
         isLoading: false,
         error: null,
         setUser: (user) => {
@@ -85,20 +75,11 @@ export const useAppStore = create<AppState>()(
         },
         setTheme: (theme) => set({ theme }, false, 'setTheme'),
         setTokens: (accessToken, refreshToken, sessionExpiresAt) =>
-          set(
-            {
-              accessToken,
-              refreshToken,
-              sessionExpiresAt: toUnixMs(sessionExpiresAt),
-            },
-            false,
-            'setTokens'
-          ),
-        setSessionExpiringSoon: sessionExpiringSoon =>
-          set({ sessionExpiringSoon }, false, 'setSessionExpiringSoon'),
-        setAuthLoading: (isAuthLoading) => set({ isAuthLoading }, false, 'setAuthLoading'),
-        setAuthError: (authError) => set({ authError }, false, 'setAuthError'),
-        logout: () => {
+          set({ accessToken, refreshToken, sessionExpiresAt }, false, "setTokens"),
+        setAuthLoading: (isAuthLoading) => set({ isAuthLoading }, false, "setAuthLoading"),
+        setAuthError: (authError) => set({ authError }, false, "setAuthError"),
+        setSessionExpiringSoon: (sessionExpiringSoon) => set({ sessionExpiringSoon }, false, "setSessionExpiringSoon"),
+        logout: () =>
           set(
             {
               user: null,
