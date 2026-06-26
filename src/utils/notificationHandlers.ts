@@ -1,7 +1,8 @@
 import * as Notifications from 'expo-notifications';
+
+import { logger } from './logger';
 import { useNotificationStore } from '../store/notificationStore';
 import { NotificationData, NotificationType } from '../types/notifications';
-import logger from './logger';
 
 type NavigationRef = {
   navigate: (screen: string, params?: Record<string, unknown>) => void;
@@ -10,25 +11,54 @@ type NavigationRef = {
 
 let navigationRef: NavigationRef | null = null;
 
+/** Keys that must never appear in a trusted notification payload. */
+const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function isNotificationType(value: unknown): value is NotificationType {
-  return typeof value === 'string' && Object.values(NotificationType).includes(value as NotificationType);
+  return (
+    typeof value === 'string' && Object.values(NotificationType).includes(value as NotificationType)
+  );
+}
+
+/**
+ * Validates and sanitizes a raw notification payload object.
+ *
+ * Rejects the payload entirely if any prototype-pollution key
+ * (`__proto__`, `constructor`, `prototype`) is present, then extracts
+ * only the explicitly-allowed fields so that no unexpected properties
+ * bleed through to the rest of the application.
+ *
+ * @returns A safe `NotificationData` object, or `undefined` when the
+ *   payload is absent, structurally invalid, or contains blocked keys.
+ */
+export function validateNotificationPayload(value: unknown): NotificationData | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+
+  const raw = value as Record<string, unknown>;
+
+  // Reject any payload that carries prototype-pollution keys
+  for (const key of Object.keys(raw)) {
+    if (BLOCKED_KEYS.has(key)) {
+      logger.warn('Notification payload rejected: blocked key detected', { key });
+      return undefined;
+    }
+  }
+
+  if (!isNotificationType(raw.type)) return undefined;
+
+  // Build the result from an explicit allow-list — never spread the raw object
+  return {
+    type: raw.type,
+    courseId: typeof raw.courseId === 'string' ? raw.courseId : undefined,
+    conversationId: typeof raw.conversationId === 'string' ? raw.conversationId : undefined,
+    achievementId: typeof raw.achievementId === 'string' ? raw.achievementId : undefined,
+    postId: typeof raw.postId === 'string' ? raw.postId : undefined,
+    deepLink: typeof raw.deepLink === 'string' ? raw.deepLink : undefined,
+  };
 }
 
 function toNotificationData(value: unknown): NotificationData | undefined {
-  if (!value || typeof value !== 'object') return undefined;
-
-  const maybeData = value as Record<string, unknown>;
-  if (!isNotificationType(maybeData.type)) return undefined;
-
-  return {
-    type: maybeData.type,
-    courseId: typeof maybeData.courseId === 'string' ? maybeData.courseId : undefined,
-    conversationId:
-      typeof maybeData.conversationId === 'string' ? maybeData.conversationId : undefined,
-    achievementId: typeof maybeData.achievementId === 'string' ? maybeData.achievementId : undefined,
-    postId: typeof maybeData.postId === 'string' ? maybeData.postId : undefined,
-    deepLink: typeof maybeData.deepLink === 'string' ? maybeData.deepLink : undefined,
-  };
+  return validateNotificationPayload(value);
 }
 
 /**
@@ -42,9 +72,7 @@ export function setNavigationRef(ref: NavigationRef): void {
 /**
  * Main handler for notification responses (when user taps a notification)
  */
-export function handleNotificationResponse(
-  response: Notifications.NotificationResponse
-): void {
+export function handleNotificationResponse(response: Notifications.NotificationResponse): void {
   const data = toNotificationData(response.notification.request.content.data);
 
   if (!data?.type) {
@@ -170,9 +198,7 @@ export function handleCommunityActivity(data: NotificationData): void {
  * Handle notification received while app is in foreground
  * Stores the notification and optionally shows in-app UI
  */
-export function handleNotificationReceived(
-  notification: Notifications.Notification
-): void {
+export function handleNotificationReceived(notification: Notifications.Notification): void {
   const { title, body, data } = notification.request.content;
   const notificationData = toNotificationData(data);
 
