@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
-import { logger } from './logger';
+import logger from './logger';
 import { useNotificationStore } from '../store/notificationStore';
 import { NotificationData, NotificationType } from '../types/notifications';
 
@@ -48,12 +48,14 @@ export function validateNotificationPayload(value: unknown): NotificationData | 
 
   // Build the result from an explicit allow-list — never spread the raw object
   return {
-    type: raw.type,
-    courseId: typeof raw.courseId === 'string' ? raw.courseId : undefined,
-    conversationId: typeof raw.conversationId === 'string' ? raw.conversationId : undefined,
-    achievementId: typeof raw.achievementId === 'string' ? raw.achievementId : undefined,
-    postId: typeof raw.postId === 'string' ? raw.postId : undefined,
-    deepLink: typeof raw.deepLink === 'string' ? raw.deepLink : undefined,
+    type: maybeData.type,
+    courseId: typeof maybeData.courseId === 'string' ? maybeData.courseId : undefined,
+    conversationId:
+      typeof maybeData.conversationId === 'string' ? maybeData.conversationId : undefined,
+    achievementId:
+      typeof maybeData.achievementId === 'string' ? maybeData.achievementId : undefined,
+    postId: typeof maybeData.postId === 'string' ? maybeData.postId : undefined,
+    deepLink: typeof maybeData.deepLink === 'string' ? maybeData.deepLink : undefined,
   };
 }
 
@@ -85,6 +87,8 @@ export function handleNotificationResponse(response: Notifications.NotificationR
   if (!isNotificationTypeEnabled(data.type)) {
     return;
   }
+
+  useNotificationStore.getState().recordEngagement();
 
   // Route to appropriate handler
   switch (data.type) {
@@ -204,9 +208,17 @@ export function handleNotificationReceived(notification: Notifications.Notificat
 
   // Check if this notification type is enabled
   if (notificationData?.type) {
-    const { isNotificationTypeEnabled, addNotification } = useNotificationStore.getState();
+    const { isNotificationTypeEnabled, addNotification, shouldThrottleNotification } =
+      useNotificationStore.getState();
 
     if (!isNotificationTypeEnabled(notificationData.type)) {
+      return;
+    }
+
+    if (shouldThrottleNotification(notificationData.type)) {
+      logger.info('Notification throttled based on engagement', {
+        type: notificationData.type,
+      });
       return;
     }
 
@@ -250,30 +262,29 @@ export function buildDeepLink(data: NotificationData): string {
  * Parse deep link URL to notification data
  */
 export function parseDeepLink(url: string): NotificationData | null {
-  try {
-    const cleanUrl = url.replace('teachlink://', '');
-    const parts = cleanUrl.split('/');
-    const route = parts[0];
-    const id = parts[1];
-
-    switch (route) {
-      case 'course':
-        return { type: NotificationType.COURSE_UPDATE, courseId: id };
-      case 'courses':
-        return { type: NotificationType.COURSE_UPDATE };
-      case 'messages':
-        return { type: NotificationType.MESSAGE, conversationId: id };
-      case 'learn':
-        return { type: NotificationType.LEARNING_REMINDER };
-      case 'achievements':
-        return { type: NotificationType.ACHIEVEMENT_UNLOCK, achievementId: id };
-      case 'community':
-        return { type: NotificationType.COMMUNITY_ACTIVITY, postId: id };
-      default:
-        return null;
-    }
-  } catch (error) {
-    logger.error('Error parsing deep link:', error);
+  if (!url.startsWith('teachlink://')) {
     return null;
+  }
+
+  const path = url.replace('teachlink://', '');
+  const parts = path.split('/');
+  const route = parts[0];
+  const id = parts[1];
+
+  switch (route) {
+    case 'course':
+      return { type: NotificationType.COURSE_UPDATE, courseId: id };
+    case 'courses':
+      return { type: NotificationType.COURSE_UPDATE };
+    case 'messages':
+      return { type: NotificationType.MESSAGE, ...(id ? { conversationId: id } : {}) };
+    case 'learn':
+      return { type: NotificationType.LEARNING_REMINDER };
+    case 'achievements':
+      return { type: NotificationType.ACHIEVEMENT_UNLOCK, ...(id ? { achievementId: id } : {}) };
+    case 'community':
+      return { type: NotificationType.COMMUNITY_ACTIVITY, ...(id ? { postId: id } : {}) };
+    default:
+      return null;
   }
 }
