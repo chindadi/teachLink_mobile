@@ -37,22 +37,11 @@ interface AppState {
   setError: (error: string | null) => void;
 }
 
-/**
- * Zustand-compatible StateStorage adapter backed by expo-secure-store.
- * Values are serialised as JSON strings since SecureStore only handles strings.
- */
-const secureStorageAdapter: StateStorage = {
-  getItem: async (name: string) => {
-    const value = await SecureStore.getItemAsync(name);
-    return value ?? null;
-  },
-  setItem: async (name: string, value: string) => {
-    await SecureStore.setItemAsync(name, value);
-  },
-  removeItem: async (name: string) => {
-    await SecureStore.deleteItemAsync(name);
-  },
-};
+const secureStorage = createJSONStorage(() => ({
+  getItem: SecureStore.getItemAsync,
+  setItem: SecureStore.setItemAsync,
+  removeItem: SecureStore.deleteItemAsync,
+}));
 
 export const useAppStore = create<AppState>()(
   devtools(
@@ -66,6 +55,7 @@ export const useAppStore = create<AppState>()(
         refreshToken: null,
         sessionExpiresAt: null,
         sessionExpiringSoon: false,
+        theme: "light",
         isLoading: false,
         error: null,
         setUser: user => {
