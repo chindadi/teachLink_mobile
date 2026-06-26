@@ -1,4 +1,4 @@
-# [1.8.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.8.0) (2026-06-26)
+# [1.9.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.9.0) (2026-06-26)
 
 
 ### Bug Fixes
@@ -62,6 +62,7 @@
 * reduce store memory footprint at startup ([3374028](https://github.com/rinafcode/teachLink_mobile/commit/33740289e80897cd586546e7af6087c77e3d6dff))
 * split appStore and lazy-init achievement state ([ab8b06a](https://github.com/rinafcode/teachLink_mobile/commit/ab8b06abf1df31b5f7197ac2886e5808d1648ef3)), closes [#5](https://github.com/rinafcode/teachLink_mobile/issues/5) [#6](https://github.com/rinafcode/teachLink_mobile/issues/6) [#29](https://github.com/rinafcode/teachLink_mobile/issues/29)
 * strategic memoization based on re-render profiling ([844c574](https://github.com/rinafcode/teachLink_mobile/commit/844c5745f9865774e48ac4e75352a76e9315d792))
+* virtualize bookmark & syllabus lists ([#219](https://github.com/rinafcode/teachLink_mobile/issues/219)) ([15868ca](https://github.com/rinafcode/teachLink_mobile/commit/15868cac9198f19b137f99f7dafc14e9b1d82932))
 
 # [1.15.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.14.1...v1.15.0) (2026-06-01)
 
