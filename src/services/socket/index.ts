@@ -5,6 +5,7 @@ import { getEnv } from '../../config';
 import syncEntityManager from '../sync/syncEntityManager';
 import type { ConflictResolutionStrategy, VersionedSyncMessage } from '../sync/types';
 import { appLogger } from '../../utils/logger';
+import { useSocketStore } from '../../store';
 
 const RECONNECTION_ATTEMPTS = 10;
 const RECONNECTION_DELAY_MS = 1_000;
@@ -12,6 +13,7 @@ const RECONNECTION_DELAY_MAX_MS = 30_000;
 
 class SocketService {
   private socket: Socket | null = null;
+  private stableConnectionTimeout?: NodeJS.Timeout;
 
   connect() {
     if (this.socket?.connected) return this.socket;
@@ -26,7 +28,7 @@ class SocketService {
         reconnectionAttempts: RECONNECTION_ATTEMPTS,
         reconnectionDelay: RECONNECTION_DELAY_MS,
         reconnectionDelayMax: RECONNECTION_DELAY_MAX_MS,
-        randomizationFactor: 0.5,
+        randomizationFactor: 0.2, // Results in ±20% jitter
         perMessageDeflate: true,
       });
 
@@ -36,10 +38,21 @@ class SocketService {
         if (transport) {
           appLogger.debug(`Socket active transport: ${transport.name}`);
         }
+        
+        // Reset connection state after stable 60s connection
+        if (this.stableConnectionTimeout) {
+          clearTimeout(this.stableConnectionTimeout);
+        }
+        this.stableConnectionTimeout = setTimeout(() => {
+          useSocketStore.getState().resetConnection();
+        }, 60000);
       });
 
       this.socket.on('disconnect', (reason: string) => {
         appLogger.warn('Socket disconnected:', reason);
+        if (this.stableConnectionTimeout) {
+          clearTimeout(this.stableConnectionTimeout);
+        }
         if (reason === 'io server disconnect') {
           this.socket?.connect();
         }
@@ -51,6 +64,7 @@ class SocketService {
 
       this.socket.on('reconnect_attempt', (attempt: number) => {
         appLogger.info(`Socket reconnection attempt #${attempt}`);
+        useSocketStore.getState().setReconnectAttempts(attempt);
       });
 
       this.socket.on('reconnect', (attempt: number) => {
@@ -63,6 +77,7 @@ class SocketService {
 
       this.socket.on('reconnect_failed', () => {
         appLogger.error(`Socket failed to reconnect after ${RECONNECTION_ATTEMPTS} attempts`);
+        useSocketStore.getState().setConnectionFailed(true);
       });
 
       this.registerRealtimeHandlers();
