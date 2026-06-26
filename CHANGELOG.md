@@ -1,4 +1,4 @@
-# [1.6.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.6.0) (2026-06-26)
+# [1.7.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.7.0) (2026-06-26)
 
 
 ### Bug Fixes
