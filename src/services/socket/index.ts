@@ -1,16 +1,13 @@
 import { io, Socket } from 'socket.io-client';
 
+import { useSocketStore } from '../../store';
 import { decodeBinaryMessage, encodeBinaryMessage } from './binaryProtocol';
 import { getEnv } from '../../config';
 import { appLogger } from '../../utils/logger';
-import { useSocketStore } from '../../store';
 import syncEntityManager from '../sync/syncEntityManager';
 
 import type { ConflictResolutionStrategy, VersionedSyncMessage } from '../sync/types';
 
-const RECONNECTION_ATTEMPTS = 10;
-const RECONNECTION_DELAY_MS = 1_000;
-const RECONNECTION_DELAY_MAX_MS = 30_000;
 
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const HEARTBEAT_TIMEOUT_MS = 5_000;
