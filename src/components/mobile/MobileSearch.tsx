@@ -198,6 +198,15 @@ export const MobileSearch = ({
     setFilterSheetVisible(false);
   }, []);
 
+  const getSearchItemLayout = useCallback(
+    (_data: SearchResultItem[] | null | undefined, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    []
+  );
+
   const showSuggestions = suggestionsVisible && query.length > 0;
   const showHistory = suggestionsVisible && !query.trim();
   const showResults = hasSearched;
@@ -280,6 +289,7 @@ export const MobileSearch = ({
             )}
             removeClippedSubviews
             contentContainerStyle={styles.resultsList}
+            getItemLayout={getSearchItemLayout}
             ListEmptyComponent={
               <Text style={styles.emptyText}>Try a different query or adjust filters.</Text>
             }
@@ -298,6 +308,9 @@ export const MobileSearch = ({
     </DelegatedKeyboardAvoidingView>
   );
 };
+
+/** Estimated height of each SearchResultCard item for optimal FlatList virtualization */
+const ITEM_HEIGHT = 120;
 
 const styles = StyleSheet.create({
   container: {
