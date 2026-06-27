@@ -1,5 +1,6 @@
 import { appLogger } from '../utils/logger';
 import { AnalyticsEvent, EventProperties } from '../utils/trackingEvents';
+import { AnalyticsBatchQueue } from './analytics/AnalyticsBatchQueue';
 
 /**
  * MobileAnalyticsService provides a centralized API for tracking user behavior
@@ -14,6 +15,7 @@ class MobileAnalyticsService {
   private currentSessionId: string | null = null;
   private currentScreen: string | null = null;
   private readonly throttledEventLastSentAt = new Map<string, number>();
+  private readonly batchQueue = new AnalyticsBatchQueue();
 
   // Critical events that must always be sent (100% volume)
   private readonly CRITICAL_EVENTS: Set<AnalyticsEvent> = new Set([
@@ -108,8 +110,7 @@ class MobileAnalyticsService {
     // Log to console/Metro for development visibility
     appLogger.info(`📊 [Analytics] Event: ${event}`, JSON.stringify(payload, null, 2));
 
-    // Here you would call the real SDK:
-    // analytics().logEvent(event, payload);
+    this.batchQueue.enqueue(event, payload);
   }
 
   private shouldThrottleHighFrequencyEvent(
@@ -205,6 +206,13 @@ class MobileAnalyticsService {
   public async resetUser(): Promise<void> {
     appLogger.info('👤 [Analytics] Reset User identity');
     // await analytics().setUserId(null);
+  }
+
+  /**
+   * Cleanup batch queue timers. Call on app teardown.
+   */
+  public destroy(): void {
+    this.batchQueue.destroy();
   }
 }
 
