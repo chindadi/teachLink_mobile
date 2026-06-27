@@ -1,4 +1,4 @@
-# [1.12.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.12.0) (2026-06-27)
+# [1.13.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.13.0) (2026-06-27)
 
 
 ### Bug Fixes
@@ -9,6 +9,7 @@
 * add environment variables to all CI workflows ([2967357](https://github.com/rinafcode/teachLink_mobile/commit/2967357d147ed2c2adb9b62ad36d2613972f28fc))
 * add expo-store-review dependency and test mocks ([805c115](https://github.com/rinafcode/teachLink_mobile/commit/805c115b3296e70504a7b5b92348464103b544cd))
 * add getItemLayout to FlatLists for virtualization performance ([0a6ec35](https://github.com/rinafcode/teachLink_mobile/commit/0a6ec35a08b415fdf21cff55cdba0fae4d6e1fd5))
+* align axios mock with project standard pattern (all HTTP methods) ([b257e20](https://github.com/rinafcode/teachLink_mobile/commit/b257e209e1443e6bfcfb36284dbd72ae9ab653cd))
 * allow lint warnings and use npm install in test workflow ([ef02e06](https://github.com/rinafcode/teachLink_mobile/commit/ef02e06aaea3e0fb7f1c7f5091e4a0202b5b8d77))
 * cap metrics buffers, add auto‑flush and memory‑pressure flushing ([5446605](https://github.com/rinafcode/teachLink_mobile/commit/54466057104e31964e99922fd9e1ea498ece9f1d))
 * change npm ci to npm install in workflows ([2fedf36](https://github.com/rinafcode/teachLink_mobile/commit/2fedf36d6cecd3d492896ccd57a4a8863a03967f))
@@ -38,6 +39,7 @@
 * **#244:** Optimized context re-renders with useMemo and useCallback and also added a test for it ([40f63f3](https://github.com/rinafcode/teachLink_mobile/commit/40f63f305b22f9e5290d4238033955cc164e2732)), closes [#244](https://github.com/rinafcode/teachLink_mobile/issues/244)
 * **#337:** Implement scroll position restoration for navigation ([3f6f87e](https://github.com/rinafcode/teachLink_mobile/commit/3f6f87e7a7e1c979ea3f7b81e27bf4ac061f7ba1)), closes [#337](https://github.com/rinafcode/teachLink_mobile/issues/337)
 * **#390:** implement activity/metrics dashboard for team visibility ([33f9c7b](https://github.com/rinafcode/teachLink_mobile/commit/33f9c7bd6f88a4e2f2fb2e9ef2ea9b8fc9283625)), closes [#390](https://github.com/rinafcode/teachLink_mobile/issues/390) [#390](https://github.com/rinafcode/teachLink_mobile/issues/390) [#31](https://github.com/rinafcode/teachLink_mobile/issues/31) [#32](https://github.com/rinafcode/teachLink_mobile/issues/32) [#33](https://github.com/rinafcode/teachLink_mobile/issues/33) [#73](https://github.com/rinafcode/teachLink_mobile/issues/73)
+* add analytics event batching with offline queue ([#670](https://github.com/rinafcode/teachLink_mobile/issues/670)) ([11314f0](https://github.com/rinafcode/teachLink_mobile/commit/11314f067980af4e077f572fdfe0e53134e54217))
 * add jailbreak/root detection to gate biometric auth and payments ([5bc3f21](https://github.com/rinafcode/teachLink_mobile/commit/5bc3f2198520012478a6a3a5ebf34952095bae83))
 * add smart multi-tier API cache ([422b683](https://github.com/rinafcode/teachLink_mobile/commit/422b683e5386e31fb19b98cfc0c17e1d79a23198))
 * add WebP image format negotiation with PNG fallback ([11db8ce](https://github.com/rinafcode/teachLink_mobile/commit/11db8ce32c426ca2a4b407581aacef6ac758e5e6))
