@@ -30,7 +30,10 @@ jest.mock('@react-native-async-storage/async-storage', () => {
 jest.mock('../../../src/services/api/axios.config', () => ({
   __esModule: true,
   default: {
+    get: jest.fn(() => Promise.resolve({ data: {} })),
     post: jest.fn(() => Promise.resolve({ data: {} })),
+    put: jest.fn(() => Promise.resolve({ data: {} })),
+    delete: jest.fn(() => Promise.resolve({ data: {} })),
   },
 }));
 
