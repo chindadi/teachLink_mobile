@@ -1,11 +1,8 @@
-import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 
 import { toUnixMs } from './persistence';
 import { sentryContextService } from '../services/sentryContext';
-
-import type { StateStorage } from 'zustand/middleware';
 
 export interface User {
   id: string;
@@ -37,12 +34,6 @@ interface AppState {
   setError: (error: string | null) => void;
 }
 
-const secureStorage = createJSONStorage(() => ({
-  getItem: SecureStore.getItemAsync,
-  setItem: SecureStore.setItemAsync,
-  removeItem: SecureStore.deleteItemAsync,
-}));
-
 export const useAppStore = create<AppState>()(
   devtools(
     persist(
@@ -55,7 +46,7 @@ export const useAppStore = create<AppState>()(
         refreshToken: null,
         sessionExpiresAt: null,
         sessionExpiringSoon: false,
-        theme: "light",
+        theme: 'light',
         isLoading: false,
         error: null,
         setUser: user => {
@@ -142,6 +133,7 @@ export const useAppStore = create<AppState>()(
 );
 
 export * from './courseProgressStore';
+export * from './deviceStore';
 export * from './metricsStore';
 export * from './notificationStore';
 export * from './reviewStore';

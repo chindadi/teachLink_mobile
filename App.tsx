@@ -11,13 +11,13 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import StorybookUI from './.rnstorybook';
 import './global.css';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import { initializeLogging } from './src/config/logging';
 import { AuthProvider, useAdaptiveTheme, useReviewMetrics } from './src/hooks';
 import AppNavigator from './src/navigation/AppNavigator';
-import { setupNotificationNavigation } from './src/navigation/linking';
 import {
   apiClient,
   getCacheStatus,
@@ -30,23 +30,20 @@ import { featureCapabilities } from './src/services/featureCapabilities';
 import { inAppReviewService } from './src/services/inAppReview';
 import { mobileAuthService } from './src/services/mobileAuth';
 import {
-  addNotificationReceivedListener,
-  getLastNotificationResponse,
   registerForPushNotifications, // Added missing native push helpers
   registerTokenWithBackend,
   removeNotificationListener,
 } from './src/services/pushNotifications';
 import { requestQueue } from './src/services/requestQueue';
+import { searchIndexService } from './src/services/searchIndex';
 import { initializeSecureStorage } from './src/services/secureStorage'; // Added missing storage helper mock path
 import socketService from './src/services/socket';
 import { syncService } from './src/services/syncService'; // Fixed naming convention from the merge conflict
-import { useAppStore, useNotificationStore } from './src/store'; // Added missing store imports
+import { useAppStore, useDeviceStore, useNotificationStore } from './src/store'; // Added missing store imports
 import { useDegradationStore } from './src/store/degradationStore';
-import { searchIndexService } from './src/services/searchIndex';
 import { handleCacheVersionUpdate } from './src/utils/cacheVersioning';
 import { requireEnvVariables } from './src/utils/env';
 import { appLogger } from './src/utils/logger';
-import { handleNotificationReceived } from './src/utils/notificationHandlers';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -117,6 +114,19 @@ const CacheRevalidationBanner = () => {
   );
 };
 
+let _compromisedAlertShown = false;
+
+function showCompromisedAlert(): void {
+  if (_compromisedAlertShown) return;
+  _compromisedAlertShown = true;
+  Alert.alert(
+    'Device Security Warning',
+    'Your device appears to be jailbroken or rooted. Sensitive features including biometric authentication and payments have been disabled to protect your account. Please use a secure device.',
+    [{ text: 'I Understand' }],
+    { cancelable: false }
+  );
+}
+
 const App = () => {
   const theme = useAppStore(state => state.theme);
   useAdaptiveTheme();
@@ -161,6 +171,16 @@ const App = () => {
 
     // Initialize crash reporting at app startup
     crashReportingService.init();
+
+    // Run jailbreak/root detection on app launch
+    useDeviceStore
+      .getState()
+      .runDeviceCompromisedCheck()
+      .then(compromised => {
+        if (compromised) {
+          showCompromisedAlert();
+        }
+      });
 
     // Initialize secure storage (Keychain/Keystore) for encrypted token storage
     initializeSecureStorage().catch(error => {
@@ -333,7 +353,12 @@ const App = () => {
       }
     };
 
+    const checkCompromisedOnForeground = async () => {
+      await useDeviceStore.getState().runDeviceCompromisedCheck();
+    };
+
     checkSessionOnForeground();
+    checkCompromisedOnForeground();
 
     const appStateSubscription = AppState.addEventListener('change', nextAppState => {
       const wasInBackground = appStateRef.current.match(/inactive|background/);
@@ -341,6 +366,7 @@ const App = () => {
 
       if (wasInBackground && isForegrounded) {
         void checkSessionOnForeground();
+        void checkCompromisedOnForeground();
       }
 
       appStateRef.current = nextAppState;
