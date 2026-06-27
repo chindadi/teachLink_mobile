@@ -197,6 +197,14 @@ export function isSecureStorageReady(): boolean {
   return isSecureStorageVerified;
 }
 
+/**
+ * Reset the secure storage initialization state.
+ * Intended for testing purposes only — allows tests to reset state between runs.
+ */
+export function resetSecureStorage(): void {
+  isSecureStorageVerified = false;
+}
+
 // ─── Token management ─────────────────────────────────────────────────────────
 
 /**

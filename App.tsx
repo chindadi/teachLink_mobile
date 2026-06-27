@@ -18,6 +18,7 @@ import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import { initializeLogging } from './src/config/logging';
 import { AuthProvider, useAdaptiveTheme, useReviewMetrics } from './src/hooks';
 import AppNavigator from './src/navigation/AppNavigator';
+import { setupNotificationNavigation } from './src/navigation/linking';
 import {
   apiClient,
   getCacheStatus,
@@ -25,9 +26,10 @@ import {
   subscribeToCacheStatus,
 } from './src/services/api';
 import { warmCriticalCaches } from './src/services/cacheWarming';
-import { crashReportingService } from './src/services/cashReporting';
+import { crashReportingService } from './src/services/crashReporting';
 import { featureCapabilities } from './src/services/featureCapabilities';
 import { inAppReviewService } from './src/services/inAppReview';
+import { initializeSecureStorage } from './src/services/secureStorage';
 import { mobileAuthService } from './src/services/mobileAuth';
 import {
   registerForPushNotifications, // Added missing native push helpers
@@ -56,7 +58,9 @@ requireEnvVariables();
 
 // Initialize centralized logging on app start
 initializeLogging().catch(err => {
-  console.error('[App] Failed to initialize logging:', err);
+  if (__DEV__) {
+    console.error('[App] Failed to initialize logging:', err);
+  }
 });
 
 if (__DEV__) {
@@ -152,7 +156,7 @@ const App = () => {
         // 3. Warm critical API caches before first render.
         await warmCriticalCaches();
       } catch (e) {
-        console.warn('Error during app initialization:', e);
+        appLogger.warnSync('Error during app initialization', { error: String(e) });
       } finally {
         setAppIsReady(true);
         await SplashScreen.hideAsync();
@@ -184,7 +188,9 @@ const App = () => {
 
     // Initialize secure storage (Keychain/Keystore) for encrypted token storage
     initializeSecureStorage().catch(error => {
-      appLogger.errorSync('Failed to initialize secure storage:', error); // Fixed 'logger.error' to 'appLogger.errorSync'
+      appLogger.errorSync('Failed to initialize secure storage:', error);
+      // Continue app startup even if secure storage init fails
+      // (user will be prompted to re-authenticate if needed)
     });
 
     // Add global handler for unhandled promise rejections
