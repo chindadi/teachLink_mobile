@@ -1,4 +1,4 @@
-# [1.13.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.13.0) (2026-06-27)
+# [1.14.0](https://github.com/rinafcode/teachLink_mobile/compare/v1.15.0...v1.14.0) (2026-06-27)
 
 
 ### Bug Fixes
@@ -31,6 +31,7 @@
 * **security:** validate & sanitise notification payload to block prototype pollution ([#586](https://github.com/rinafcode/teachLink_mobile/issues/586)) ([55018be](https://github.com/rinafcode/teachLink_mobile/commit/55018be41c170d88f2b083e76309bc4aba36e5ab))
 * store notification timestamps as numeric ms, add migration and update logic ([c5cf4b0](https://github.com/rinafcode/teachLink_mobile/commit/c5cf4b0556659c991cca3a1870e7ff559b742f19))
 * **store:** fix degradedFeatures Set serialization bug in persist middleware ([5a8a069](https://github.com/rinafcode/teachLink_mobile/commit/5a8a069ffc4311c9fa0702b1fcc3881f4658430f))
+* validate and sanitize incoming deep links to prevent open redirects ([96064c9](https://github.com/rinafcode/teachLink_mobile/commit/96064c984a1cbb8673b8fd99936442ca2309938c))
 * wrap bundle-size comment step in try-catch to allow fork PRs to pass ([3b88561](https://github.com/rinafcode/teachLink_mobile/commit/3b88561a62a6f84d747124bbea27f8c9dbdaf3d8))
 
 
