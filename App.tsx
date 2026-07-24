@@ -261,12 +261,17 @@ const App = () => {
   useEffect(() => {
     if (!appIsReady) return;
 
+    // #848: track previous state locally so this listener detects foreground
+    // transitions on its own, rather than depending on another effect to keep
+    // a shared ref current. The subscription is removed on cleanup below.
+    let previousState = AppState.currentState;
     const appStateSubscription = AppState.addEventListener('change', nextAppState => {
-      const wasInBackground = appStateRef.current.match(/inactive|background/);
+      const wasInBackground = previousState.match(/inactive|background/);
       const isForegrounded = nextAppState === 'active';
       if (wasInBackground && isForegrounded) {
         void checkForOtaUpdate();
       }
+      previousState = nextAppState;
     });
 
     // Check once on first foreground after app ready
