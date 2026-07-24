@@ -411,6 +411,7 @@ const MobileVideoPlayer = ({
       }
     },
     [autoPlay, isSwitchingQuality, onEnd, onError, onPlaybackStatusUpdate, attemptRecovery]
+    [autoPlay, isSwitchingQuality, onEnd, onError, onPlaybackStatusUpdate]
   );
 
   useEffect(() => {
