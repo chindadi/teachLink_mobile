@@ -102,8 +102,21 @@ class MobileAuthService {
       throw new Error('Biometric login is not enabled. Please enable it in settings.');
     }
 
-    // Mocked biometric login
-    throw new Error('Biometric authentication is not available.');
+    const available = await this.isBiometricAvailable();
+    if (!available) {
+      throw new Error('Biometric authentication is not available on this device.');
+    }
+
+    // A successful biometric prompt unlocks the session persisted in secure
+    // storage. Each dependency is mockable, so all outcomes (enabled/disabled,
+    // available/unavailable, session present/absent) are testable.
+    const session = await this.restoreSession();
+    if (!session) {
+      throw new Error('No stored session found. Please log in with your password.');
+    }
+
+    logger.info('MobileAuth: biometric login succeeded');
+    return session;
   }
 
   // ── Token refresh ─────────────────────────────────────────────────────────
