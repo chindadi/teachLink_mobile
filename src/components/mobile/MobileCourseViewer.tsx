@@ -21,6 +21,7 @@ import { useCourseProgress, useDynamicFontSize } from '../../hooks';
 import { useAnalytics } from '../../hooks/useAnalytics';
 import { useInAppReview, useReviewMetrics } from '../../hooks/useInAppReview';
 import { usePrefetchImages } from '../../hooks/usePrefetchImages';
+import certificateService from '../../services/certificateService';
 import { ReviewTrigger } from '../../services/inAppReview';
 import { useReviewStore } from '../../store/reviewStore';
 import { Course, Lesson, Note } from '../../types/course';
@@ -246,6 +247,9 @@ const MobileCourseViewer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course.id]);
 
+  // #833: ensure a certificate is only requested once per completion.
+  const certificateRequestedRef = useRef(false);
+
   // Track course completion
   useEffect(() => {
     if (progress) {
@@ -256,6 +260,12 @@ const MobileCourseViewer = ({
           courseTitle: course.title,
           progress: overallProgress,
         });
+
+        // #833: generate the certificate of completion for the finished course.
+        if (!certificateRequestedRef.current) {
+          certificateRequestedRef.current = true;
+          void certificateService.generateCertificate(course.id, course.title);
+        }
 
         // Track and request review
         trackCourseComplete();
