@@ -2,6 +2,7 @@ import { Network } from 'expo-network';
 import { useState, useEffect, useCallback } from 'react';
 
 import { networkMonitor, type ConnectionType, type NetworkStatus } from '../services/networkMonitor';
+import { appLogger } from '../utils/logger';
 
 export type { ConnectionType, NetworkStatus };
 
@@ -61,7 +62,7 @@ export function useNetworkStatus() {
             isFast = false;
           }
         } catch (error) {
-          console.warn('Failed to get cellular state', error);
+          appLogger.warnSync('Failed to get cellular state', { error: String(error) });
           quality = 'unknown';
           isFast = false;
         }
@@ -72,7 +73,7 @@ export function useNetworkStatus() {
 
       setConnectionQuality({ quality, isFast });
     } catch (error) {
-      console.warn('Failed to get network state', error);
+      appLogger.warnSync('Failed to get network state', { error: String(error) });
       setNetworkStatus({
         isConnected: false,
         isInternetReachable: false,

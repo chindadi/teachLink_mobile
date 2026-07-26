@@ -9,6 +9,8 @@ import {
 } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+import { appLogger } from '../utils/logger';
+
 const storage = new MMKV();
 
 /**
@@ -45,7 +47,7 @@ export const createStore = <T extends object>(
         onRehydrateStorage: (state) => {
           return (state, error) => {
             if (error) {
-              console.log('an error happened during hydration', error)
+              appLogger.errorSync('an error happened during hydration', error instanceof Error ? error : new Error(String(error)))
             }
           }
         },
