@@ -45,6 +45,7 @@ import {
   registerForPushNotifications, // Added missing native push helpers
   registerTokenWithBackend,
   removeNotificationListener,
+  setupForegroundBadgeSync,
 } from './src/services/pushNotifications';
 import { requestQueue } from './src/services/requestQueue';
 import { searchIndexService } from './src/services/searchIndex';
@@ -219,6 +220,8 @@ const App = () => {
           Asset.loadAsync(CRITICAL_ASSETS),
         ]);
         appLogger.infoSync(`[App] Critical fonts & assets loaded in ${Date.now() - fontStart}ms`);
+        await fontService.loadFonts(CRITICAL_FONTS);
+        appLogger.infoSync(`[App] Critical fonts loaded in ${Date.now() - fontStart}ms`);
 
         // 2. Version-based cache invalidation: clear stale caches on app/data version bump
         const appVersion = require('./package.json').version as string;
@@ -371,6 +374,15 @@ const App = () => {
     // These tasks are non-critical: they enhance the experience but are not
     // needed for the initial render or core feature set. Scheduling them
     // via InteractionManager.runAfterInteractions() improves TTI by 60-70%.
+    //
+    // Issue #820: Use refs to hold the notification subscription and cleanup
+    // function so the effect cleanup below always reads the *current* value
+    // rather than a stale closure capture from mount time.
+    const notificationSubscriptionRef: { current: Notifications.Subscription | null } = {
+      current: null,
+    };
+    const notificationCleanupRef: { current: (() => void) | null } = { current: null };
+
     InteractionManager.runAfterInteractions(() => {
       // Socket connection (network I/O)
       socketService.connect();
@@ -379,6 +391,7 @@ const App = () => {
       featureCapabilities
         .checkAllCapabilities()
         .then(capabilities => {
+          // Issue #820: read directly from store rather than closing over component state.
           const degradationStore = useDegradationStore.getState();
           appLogger.infoSync('[App] Feature capabilities checked', {
             camera: capabilities.camera.status,
@@ -398,10 +411,12 @@ const App = () => {
           );
         });
 
-      // Push notification registration and explainer logic
+      // Push notification registration and explainer logic.
+      // Issue #820: all state reads use store.getState() instead of closed-over
+      // component state so the callback always operates on the current values.
       const checkAndRegisterNotifications = async () => {
         const { status } = await Notifications.getPermissionsAsync();
-        
+
         if (status === 'granted') {
           // Already granted, silently get token
           const token = await registerForPushNotifications(false);
@@ -416,7 +431,7 @@ const App = () => {
 
         // Check explainer status
         const hasSeen = await AsyncStorage.getItem('hasSeenNotificationExplainer');
-        
+
         if (hasSeen === 'true') {
           // Explainer already seen and accepted, do not show sheet again
           return;
@@ -427,11 +442,11 @@ const App = () => {
           useNotificationStore.getState().setShowNotificationExplainer(true);
         } else if (hasSeen === 'deferred') {
           // Deferred users
-          const deferredCountStr = await AsyncStorage.getItem('appOpenCountSinceDeferral') || '0';
+          const deferredCountStr = (await AsyncStorage.getItem('appOpenCountSinceDeferral')) || '0';
           let deferredCount = parseInt(deferredCountStr, 10);
           deferredCount += 1;
           await AsyncStorage.setItem('appOpenCountSinceDeferral', deferredCount.toString());
-          
+
           if (deferredCount >= 3) {
             useNotificationStore.getState().setShowNotificationExplainer(true);
           }
@@ -439,6 +454,26 @@ const App = () => {
       };
 
       checkAndRegisterNotifications();
+
+      // Store the subscription so the cleanup closure can remove it.
+      notificationSubscriptionRef.current = Notifications.addNotificationReceivedListener(
+        notification => {
+          // Issue #820: read store directly rather than closed-over component state.
+          const store = useNotificationStore.getState();
+          store.addNotification({
+            id: notification.request.identifier,
+            type: (notification.request.content.data?.type as any) ?? 'general',
+            title: notification.request.content.title ?? '',
+            body: notification.request.content.body ?? '',
+            data: notification.request.content.data as any,
+            receivedAt: new Date().toISOString(),
+            read: false,
+          });
+        }
+      );
+
+      // Store the badge-sync teardown so we can call it on unmount.
+      notificationCleanupRef.current = setupForegroundBadgeSync();
 
       // Request queue monitoring
       requestQueue.startMonitoring(apiClient);
@@ -460,8 +495,14 @@ const App = () => {
     return () => {
       socketService.disconnect();
       syncService.stopAutoSync();
-      notificationCleanup();
-      removeNotificationListener(subscription);
+      // Issue #820: call cleanup via refs so we always get the current function,
+      // not a stale closure from the time this effect ran.
+      if (notificationCleanupRef.current) {
+        notificationCleanupRef.current();
+      }
+      if (notificationSubscriptionRef.current) {
+        removeNotificationListener(notificationSubscriptionRef.current);
+      }
       // @ts-ignore
       global.onunhandledrejection = undefined;
     };

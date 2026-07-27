@@ -8,6 +8,7 @@ import {
   type StateStorage,
 } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import logger from '../utils/logger';
 
 import { appLogger } from '../utils/logger';
 
@@ -48,6 +49,7 @@ export const createStore = <T extends object>(
           return (state, error) => {
             if (error) {
               appLogger.errorSync('an error happened during hydration', error instanceof Error ? error : new Error(String(error)))
+              logger.errorSync('an error happened during hydration', error as Error)
             }
           }
         },

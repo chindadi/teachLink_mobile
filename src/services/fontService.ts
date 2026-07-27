@@ -4,6 +4,7 @@ import * as Font from 'expo-font';
 import { Platform } from 'react-native';
 
 import { appLogger } from '../utils/logger';
+import logger from '../utils/logger';
 
 // Font metadata interface
 export interface FontMetadata {
@@ -56,6 +57,7 @@ class FontService {
       }
     } catch (error) {
       appLogger.errorSync('Failed to load font metadata:', error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync('Failed to load font metadata:', error as Error);
     }
   }
 
@@ -66,6 +68,7 @@ class FontService {
       await AsyncStorage.setItem(this.cacheKey, JSON.stringify(data));
     } catch (error) {
       appLogger.errorSync('Failed to save font metadata:', error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync('Failed to save font metadata:', error as Error);
     }
   }
 
@@ -78,6 +81,7 @@ class FontService {
       }
     } catch (error) {
       appLogger.errorSync('Failed to load font settings:', error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync('Failed to load font settings:', error as Error);
     }
   }
 
@@ -87,6 +91,7 @@ class FontService {
       await AsyncStorage.setItem(this.settingsKey, JSON.stringify(this.defaultSettings));
     } catch (error) {
       appLogger.errorSync('Failed to save font settings:', error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync('Failed to save font settings:', error as Error);
     }
   }
 
@@ -165,6 +170,7 @@ class FontService {
       return true;
     } catch (error) {
       appLogger.errorSync(`Failed to load font ${name}:`, error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync(`Failed to load font ${name}:`, error as Error);
       return false;
     }
   }
@@ -270,6 +276,7 @@ class FontService {
     });
     const elapsed = Date.now() - start;
     appLogger.infoSync(`[FontService] Loaded ${fonts.length} font(s) in ${elapsed}ms`);
+    logger.infoSync(`[FontService] Loaded ${fonts.length} font(s) in ${elapsed}ms`);
   }
 
   // Preload critical fonts

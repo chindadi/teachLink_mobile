@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { appLogger } from '../utils/logger';
+import logger from '../utils/logger';
 
 // Font configuration
 export interface FontConfig {
@@ -94,6 +95,7 @@ async function loadSingleFont(config: FontConfig): Promise<boolean> {
     })
     .catch((error) => {
       appLogger.errorSync(`Failed to load font ${config.name}:`, error instanceof Error ? error : new Error(String(error)));
+      logger.errorSync(`Failed to load font ${config.name}:`, error);
       return false;
     });
 
@@ -237,6 +239,7 @@ export async function preloadCriticalFonts() {
 
   if (failed.length > 0) {
     appLogger.warnSync('Some critical fonts failed to load:', { failed });
+    logger.warnSync('Some critical fonts failed to load:', { failed });
   }
 
   return { loaded, failed };

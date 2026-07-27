@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { AppState, AppStateStatus, Platform } from 'react-native';
 
 import { featureCapabilities, FeatureStatus, FeatureType } from './featureCapabilities';
+import apiClient from './api/axios.config';
 import { useDegradationStore } from '../store/degradationStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { NotificationData, NotificationType } from '../types/notifications';
@@ -221,21 +222,21 @@ export async function registerTokenWithBackend(token: string): Promise<boolean> 
 }
 
 /**
- * Unregister push token from backend server
- * TODO: Implement actual API call when backend is ready
+ * Unregister push token from backend server.
+ * Called during logout (including session-expiry logout) to prevent
+ * the user from receiving push notifications after signing out.
+ *
+ * Calls DELETE /api/notifications/tokens/:token
  */
 export async function unregisterTokenFromBackend(token: string): Promise<boolean> {
   try {
-    // TODO: Replace with actual API endpoint
-    // const response = await apiClient.delete('/api/notifications/unregister', {
-    //   data: { token },
-    // });
-    // return response.data.success;
-
-    logger.info('Push token unregistered:', token);
+    await apiClient.delete(`/api/notifications/tokens/${encodeURIComponent(token)}`);
+    logger.info('Push token unregistered from backend');
     return true;
   } catch (error) {
     logger.error('Error unregistering token from backend:', error);
+    // Return false but do not re-throw — caller should still proceed with
+    // local token cleanup so a network failure never blocks logout.
     return false;
   }
 }
