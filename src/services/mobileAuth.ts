@@ -2,6 +2,8 @@
 import logger from '../utils/logger';
 import apiClient from './api/axios.config';
 import * as secureStorage from './secureStorage';
+import { unregisterTokenFromBackend } from './pushNotifications';
+import { useNotificationStore } from '../store/notificationStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -195,7 +197,17 @@ class MobileAuthService {
 
   async logout(): Promise<void> {
     try {
-      // Notify backend
+      // Unregister push token from backend before clearing session.
+      // This runs unconditionally (including session-expiry logouts) so the
+      // user stops receiving notifications immediately after sign-out.
+      const pushToken = useNotificationStore.getState().pushToken;
+      if (pushToken) {
+        await unregisterTokenFromBackend(pushToken);
+        // Clear token from local store after successful (or failed) unregistration
+        useNotificationStore.getState().setPushToken(null);
+      }
+
+      // Notify backend of the logout session termination
       const accessToken = await secureStorage.getAccessToken();
       if (accessToken) {
         await apiClient

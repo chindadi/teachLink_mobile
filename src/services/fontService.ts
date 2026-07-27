@@ -3,6 +3,8 @@ import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import { Platform } from 'react-native';
 
+import logger from '../utils/logger';
+
 // Font metadata interface
 export interface FontMetadata {
   name: string;
@@ -53,7 +55,7 @@ class FontService {
         });
       }
     } catch (error) {
-      console.error('Failed to load font metadata:', error);
+      logger.errorSync('Failed to load font metadata:', error as Error);
     }
   }
 
@@ -63,7 +65,7 @@ class FontService {
       const data = Object.fromEntries(this.metadata);
       await AsyncStorage.setItem(this.cacheKey, JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save font metadata:', error);
+      logger.errorSync('Failed to save font metadata:', error as Error);
     }
   }
 
@@ -75,7 +77,7 @@ class FontService {
         this.defaultSettings = JSON.parse(cached);
       }
     } catch (error) {
-      console.error('Failed to load font settings:', error);
+      logger.errorSync('Failed to load font settings:', error as Error);
     }
   }
 
@@ -84,7 +86,7 @@ class FontService {
     try {
       await AsyncStorage.setItem(this.settingsKey, JSON.stringify(this.defaultSettings));
     } catch (error) {
-      console.error('Failed to save font settings:', error);
+      logger.errorSync('Failed to save font settings:', error as Error);
     }
   }
 
@@ -162,7 +164,7 @@ class FontService {
 
       return true;
     } catch (error) {
-      console.error(`Failed to load font ${name}:`, error);
+      logger.errorSync(`Failed to load font ${name}:`, error as Error);
       return false;
     }
   }
@@ -267,7 +269,7 @@ class FontService {
       this.loadedFonts.add(name);
     });
     const elapsed = Date.now() - start;
-    console.log(`[FontService] Loaded ${fonts.length} font(s) in ${elapsed}ms`);
+    logger.infoSync(`[FontService] Loaded ${fonts.length} font(s) in ${elapsed}ms`);
   }
 
   // Preload critical fonts
