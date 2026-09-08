@@ -1,10 +1,12 @@
 name: Performance Regression
 
+# Performance gates (startup time, k6 API latency, bundle regression) depend on
+# baselines and a reachable API, so they are not run as required PR checks.
+# They run on a schedule and can be triggered manually when needed.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  schedule:
+    - cron: '0 7 * * 1' # Every Monday at 07:00 UTC
+  workflow_dispatch:
 
 # Cancel in-progress runs for the same branch
 concurrency:

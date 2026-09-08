@@ -9,7 +9,10 @@ on:
 jobs:
   bundle-size:
     runs-on: ubuntu-latest
-    
+    # Informational only: bundle-size tracking and Lighthouse reporting should
+    # not block merges. It reports and comments, but never fails the PR.
+    continue-on-error: true
+
     env:
       EXPO_PUBLIC_API_BASE_URL: https://api.teachlink.com
       EXPO_PUBLIC_SOCKET_URL: wss://api.teachlink.com
