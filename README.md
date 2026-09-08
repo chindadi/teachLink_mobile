@@ -2,6 +2,8 @@
 
 A cross-platform mobile app built with [Expo](https://expo.dev) and React Native for sharing knowledge, live chat, push notifications, and creator monetisation.
 
+TeachLink Mobile is the mobile client of the TeachLink platform. It talks to the [teachLink_backend](https://github.com/rinafcode/teachLink_backend) API; on-chain rewards settle on Stellar via [teachLink_contract](https://github.com/rinafcode/teachLink_contract). See the [organization overview](https://github.com/rinafcode) for how the pieces fit together.
+
 ## Prerequisites
 
 - **Node.js** v18 or later
@@ -14,7 +16,7 @@ A cross-platform mobile app built with [Expo](https://expo.dev) and React Native
 ## Installation
 
 ```bash
-git clone https://github.com/shogun444/teachLink_mobile.git
+git clone https://github.com/rinafcode/teachLink_mobile.git
 cd teachLink_mobile
 npm install
 cp .env.example .env
@@ -257,8 +259,6 @@ Refer to the official EAS docs for more details.
 
 TeachLink Mobile uses **Expo Application Services (EAS)** for building and submitting to the app stores.
 
-> 📖 For the full deployment guide, see **[DEPLOY.md](./DEPLOY.md)**
-
 ### Quick Start
 
 ```bash
@@ -294,4 +294,4 @@ EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS=true
 
 > ⚠️ Never commit your `.env` file. It is listed in `.gitignore`.
 
-See [DEPLOY.md](./DEPLOY.md) for platform-specific setup (Google Play & App Store), build profiles, troubleshooting, and security notes.
+For platform-specific setup (Google Play & App Store), build profiles, and credentials, see the [EAS Build](https://docs.expo.dev/build/introduction/) and [EAS Submit](https://docs.expo.dev/submit/introduction/) documentation.
