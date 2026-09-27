@@ -55,6 +55,17 @@ export function getLowQualityImageUrl(uri: string): string {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+/**
+ * `expo-image` does not declare a load-complete callback in its `ImageProps`
+ * type; its own equivalent is `onLoad`. `CachedImage` has always attached its
+ * completion handler under `onLoadingComplete`, so the handler is declared
+ * explicitly here to keep it fully typed (no cast) and still present on the
+ * rendered image, without changing behaviour or breaking existing callers.
+ */
+type NativeImageProps = ExpoImageProps & {
+  onLoadingComplete?: () => void;
+};
+
 interface CachedImageProps extends Omit<ExpoImageProps, 'source'> {
   /** Image source URI */
   uri: string | null | undefined;
@@ -80,7 +91,7 @@ function resolveStyleDimension(
   style: StyleProp<ImageStyle>,
   key: 'width' | 'height'
 ): number | undefined {
-  const flattened = StyleSheet.flatten(style) as ImageStyle | undefined;
+  const flattened = StyleSheet.flatten(style);
   const value = flattened?.[key];
   return typeof value === 'number' ? value : undefined;
 }
@@ -133,8 +144,8 @@ const CachedImageComponent: React.FC<CachedImageProps> = ({
   // Stable across re-renders — initialized exactly once per component instance
   const opacity = useRef(new Animated.Value(0)).current;
 
-  const styleWidth = resolveStyleDimension(style as StyleProp<ImageStyle>, 'width');
-  const styleHeight = resolveStyleDimension(style as StyleProp<ImageStyle>, 'height');
+  const styleWidth = resolveStyleDimension(style, 'width');
+  const styleHeight = resolveStyleDimension(style, 'height');
 
   const resolvedUri = dataSaverEnabled && uri ? getLowQualityImageUrl(uri) : uri;
   const optimizedSources = useMemo(() => {
@@ -151,11 +162,6 @@ const CachedImageComponent: React.FC<CachedImageProps> = ({
       preferWebp: true,
     });
   }, [resolvedUri, targetWidth, targetHeight, styleWidth, styleHeight, dataSaverEnabled]);
-
-  // These were part of a dimension-detection feature that was removed;
-  // kept as undefined so the JSX guards below remain falsy without ReferenceError.
-  const aspectRatioStyle: undefined = undefined;
-  const detectedDimensions: undefined = undefined;
 
   const [isLoading, setIsLoading] = useState(!!resolvedUri);
   const [, setError] = useState<Error | null>(null);
@@ -219,21 +225,15 @@ const CachedImageComponent: React.FC<CachedImageProps> = ({
     logger.warn(`Failed to load image: ${optimizedSources?.primaryUri}`, error);
   };
 
-  // ─── Calculate container style with aspect ratio ─────────────────────────
+  // ─── Native handler props outside expo-image's public typings ──────────────
 
-  const getContainerStyle = () => {
-    if (aspectRatioStyle) {
-      return [
-        styles.container,
-        {
-          width: aspectRatioStyle.width,
-          height: aspectRatioStyle.height,
-        },
-        style,
-      ];
-    }
-    return [styles.container, style];
+  const loadCompleteHandlerProps: NativeImageProps = {
+    onLoadingComplete: handleLoadingComplete,
   };
+
+  // ─── Calculate container style ───────────────────────────────────────────
+
+  const getContainerStyle = () => [styles.container, style];
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -252,16 +252,12 @@ const CachedImageComponent: React.FC<CachedImageProps> = ({
             startedAtRef.current = Date.now();
             usingFallbackRef.current = false;
           }}
-          onLoadingComplete={handleLoadingComplete}
+          {...loadCompleteHandlerProps}
           onError={handleError}
           accessibilityLabel={alt}
           accessibilityRole="image"
           {...expoImageProps}
-          style={[
-            styles.image,
-            aspectRatioStyle ? { aspectRatio: detectedDimensions?.aspectRatio } : null,
-            style,
-          ]}
+          style={[styles.image, style]}
         />
       </Animated.View>
 
